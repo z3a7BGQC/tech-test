@@ -8,10 +8,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+//import static org.assertj.core.api.Assertions.within;
+//import static org.assertj.core.api.AbstractIntegerAssert.isCloseTo;
 import static org.hmxlabs.techtest.TestDataHelper.TEST_NAME;
 import static org.hmxlabs.techtest.TestDataHelper.createTestDataBodyEntity;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 public class DataBodyEntityTests {
@@ -49,6 +53,22 @@ public class DataBodyEntityTests {
         dataHeaderEntity2.setCreatedTimestamp(Instant.now().plusSeconds(100L));
         DataBodyEntity dataBodyEntity2 = createTestDataBodyEntity(dataHeaderEntity2);
 
-        assertThat(dataBodyEntity1).isEqualTo(dataBodyEntity2);
+        assertTrue(dataBodyEntity1.equals(dataBodyEntity2));
+
+//        assertThat(dataBodyEntity1).isEqualToIgnoringGivenFields(dataBodyEntity2, "createdTimestamp", "dataHeaderEntity");
+//        assertThat(dataBodyEntity1.getCreatedTimestamp().isCloseTo(dataBodyEntity2.getCreatedTimestamp(), within(100, ChronoUnit.MILLIS)));
+//        assertThat(dataBodyEntity1.getData)
+
+        /*
+        - Why would we want to test equality?
+        - This test is failing because it's testing reference equality.
+        - I considered using recursive equality e.g. (TODO) but that won't work with the timestamps
+        - Comparing current timestamps causes flaky tests if you do not use specific test methods e.g. AssertJ's isCloseTo()
+        - Could override equals to do value equality - this has maintainance issues as if you add new fields your test will continue to pass.
+        - Found Lombok's @EqualsAndHashCode annotation
+            - I still have the 'problem' of the timestamps as DataBodyEntity has a DataHeaderEntity which also has a timestamp
+            - Turns out excluding DataHeaderEntity.createdTimestamp means it's excluded in DataBodyEntity.dataHeaderEntity
+            - TODO look up the code for that because that's cool.
+         */
     }
 }
