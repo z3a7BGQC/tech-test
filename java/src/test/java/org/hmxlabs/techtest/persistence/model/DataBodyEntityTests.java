@@ -35,9 +35,6 @@ public class DataBodyEntityTests {
         assertThat(dataBodyEntity.getDataBody()).isNotNull();
     }
 
-    /**
-     * TODO: This test intentionally fails and the code it tests against will need to be fixed.
-     */
     @Test
     public void checkTwoDataBodiesAreEqualAsExpected() {
 
@@ -54,10 +51,6 @@ public class DataBodyEntityTests {
         DataBodyEntity dataBodyEntity2 = createTestDataBodyEntity(dataHeaderEntity2);
 
         assertTrue(dataBodyEntity1.equals(dataBodyEntity2));
-
-//        assertThat(dataBodyEntity1).isEqualToIgnoringGivenFields(dataBodyEntity2, "createdTimestamp", "dataHeaderEntity");
-//        assertThat(dataBodyEntity1.getCreatedTimestamp().isCloseTo(dataBodyEntity2.getCreatedTimestamp(), within(100, ChronoUnit.MILLIS)));
-//        assertThat(dataBodyEntity1.getData)
 
         /*
         - Why would we want to test equality?
