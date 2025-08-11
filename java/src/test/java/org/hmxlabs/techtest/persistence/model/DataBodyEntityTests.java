@@ -55,7 +55,7 @@ public class DataBodyEntityTests {
         /*
         - Why would we want to test equality?
         - This test is failing because it's testing reference equality.
-        - I considered using recursive equality e.g. (TODO) but that won't work with the timestamps
+        - I considered using recursive equality e.g. (assertThat().usingRecursiveComparison().isEqualTo()) but that won't work with the timestamps
         - Comparing current timestamps causes flaky tests if you do not use specific test methods e.g. AssertJ's isCloseTo()
         - Could override equals to do value equality - this has maintainance issues as if you add new fields your test will continue to pass.
         - Found Lombok's @EqualsAndHashCode annotation
