@@ -32,7 +32,11 @@ public class ServerController {
         boolean checksumPass = server.saveDataEnvelope(dataEnvelope);
 
         log.info("Data envelope persisted. Attribute name: {}", dataEnvelope.getDataHeader().getName());
-        return ResponseEntity.ok(checksumPass);
+        return ResponseEntity.ok(checksumPass); // change to CREATED status if successful checksum?
     }
 
 }
+
+/* Was looking up how to transport the checksum - found the Content-MD5 header, which is now deprecated.
+    Alternatives are - the Content-Digest header or making a custom content header for your service.
+ */

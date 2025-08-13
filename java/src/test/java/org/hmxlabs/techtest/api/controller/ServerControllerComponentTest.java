@@ -62,7 +62,8 @@ public class ServerControllerComponentTest {
 
 		MvcResult mvcResult = mockMvc.perform(post(URI_PUSHDATA)
 				.content(testDataEnvelopeJson)
-				.contentType(MediaType.APPLICATION_JSON_VALUE))
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+						.header("Content-Digest", ""))
 				.andExpect(status().isOk())
 				.andReturn();
 
