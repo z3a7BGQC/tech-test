@@ -55,7 +55,7 @@ public class ClientImpl implements Client {
             functionality/reactive programming,so for the sake of time I am sticking with RestTemplate.
             I am also inclined to get something working, even if simpler and it turns out to be under-architected,
             rather than overcomplicate code and make it less maintainable if that functionality is not needed.
-            TODO come back and try out a WebClient implementation
+            TODO come back and try out a WebClient implementation?
          */
 
     }

@@ -1,5 +1,6 @@
 package org.hmxlabs.techtest.api.controller;
 
+import lombok.SneakyThrows;
 import org.hmxlabs.techtest.TestDataHelper;
 import org.hmxlabs.techtest.server.api.controller.ServerController;
 import org.hmxlabs.techtest.server.api.model.DataEnvelope;
@@ -41,8 +42,10 @@ public class ServerControllerComponentTest {
 	private ObjectMapper objectMapper;
 	private MockMvc mockMvc;
 	private ServerController serverController;
+	private String testDataEnvelopeChecksumHeader;
 
 	@BeforeEach
+	@SneakyThrows
 	public void setUp() throws HadoopClientException, NoSuchAlgorithmException, IOException {
 		serverController = new ServerController(serverMock);
 		mockMvc = standaloneSetup(serverController).build();
@@ -52,6 +55,8 @@ public class ServerControllerComponentTest {
 
 		testDataEnvelope = TestDataHelper.createTestDataEnvelopeApiObject();
 
+		testDataEnvelopeChecksumHeader = TestDataHelper.generateMd5ChecksumHeader(testDataEnvelope);
+
 		when(serverMock.saveDataEnvelope(any(DataEnvelope.class))).thenReturn(true);
 	}
 
@@ -60,10 +65,12 @@ public class ServerControllerComponentTest {
 
 		String testDataEnvelopeJson = objectMapper.writeValueAsString(testDataEnvelope);
 
+
+
 		MvcResult mvcResult = mockMvc.perform(post(URI_PUSHDATA)
 				.content(testDataEnvelopeJson)
 				.contentType(MediaType.APPLICATION_JSON_VALUE)
-						.header("Content-Digest", ""))
+						.header("Content-Digest", testDataEnvelopeChecksumHeader))
 				.andExpect(status().isOk())
 				.andReturn();
 
