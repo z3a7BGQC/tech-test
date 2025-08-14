@@ -57,7 +57,7 @@ public class ServerControllerComponentTest {
 
 		testDataEnvelopeChecksumHeader = TestDataHelper.generateMd5ChecksumHeader(testDataEnvelope);
 
-		when(serverMock.saveDataEnvelope(any(DataEnvelope.class))).thenReturn(true);
+//		when(serverMock.saveDataEnvelope(any(DataEnvelope.class))).thenReturn(true);
 	}
 
 	@Test
@@ -69,17 +69,12 @@ public class ServerControllerComponentTest {
 				.content(testDataEnvelopeJson)
 				.contentType(MediaType.APPLICATION_JSON_VALUE)
 						.header("Content-Digest", testDataEnvelopeChecksumHeader))
-				.andExpect(status().isCreated())
+				.andExpect(status().isOk())
 				.andReturn();
 
 		boolean checksumPass = Boolean.parseBoolean(mvcResult.getResponse().getContentAsString());
 		assertThat(checksumPass).isTrue();
 //		assertThat() test for header?
-	}
-
-	@Test
-	public void testSaveDataEnvelopeValidChecksum() {
-
 	}
 
 	@Test

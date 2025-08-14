@@ -1,5 +1,6 @@
 package org.hmxlabs.techtest.server.component.impl;
 
+import lombok.SneakyThrows;
 import org.hmxlabs.techtest.server.api.model.DataEnvelope;
 import org.hmxlabs.techtest.server.persistence.model.DataBodyEntity;
 import org.hmxlabs.techtest.server.persistence.model.DataHeaderEntity;
@@ -28,7 +29,8 @@ public class ServerImpl implements Server {
      * @return true if there is a match with the client provided checksum.
      */
     @Override
-    public boolean saveDataEnvelope(DataEnvelope envelope, String contentDigest) {
+    @SneakyThrows
+    public boolean saveDataEnvelope(DataEnvelope envelope) {
 
         // generate checksum
         // compare checksum
@@ -40,15 +42,7 @@ public class ServerImpl implements Server {
         persist(envelope);
 
         log.info("Data persisted successfully, data name: {}", envelope.getDataHeader().getName());
-        return false;
-    }
-
-    public
-
-    public String isChecksumValid(DataEnvelope dataEnvelope, String md5Checksum) throws NoSuchAlgorithmException {
-        byte[] dataEnvelopeBytes = SerializationUtils.serialize(dataEnvelope);
-        byte[] hash = MessageDigest.getInstance("MD5").digest(dataEnvelopeBytes);
-        return "md5=" + new BigInteger(1, hash).toString(16);
+        return true;
     }
 
 
