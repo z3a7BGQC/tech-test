@@ -65,16 +65,35 @@ public class ServerControllerComponentTest {
 
 		String testDataEnvelopeJson = objectMapper.writeValueAsString(testDataEnvelope);
 
-
-
 		MvcResult mvcResult = mockMvc.perform(post(URI_PUSHDATA)
 				.content(testDataEnvelopeJson)
 				.contentType(MediaType.APPLICATION_JSON_VALUE)
 						.header("Content-Digest", testDataEnvelopeChecksumHeader))
-				.andExpect(status().isOk())
+				.andExpect(status().isCreated())
 				.andReturn();
 
 		boolean checksumPass = Boolean.parseBoolean(mvcResult.getResponse().getContentAsString());
 		assertThat(checksumPass).isTrue();
 	}
+
+	@Test
+	public void testSaveDataEnvelopeValidChecksum() {
+
+	}
+
+	@Test
+	public void testSaveDataEnvelopeInvalidChecksum() {
+
+	}
+
+	/** Test Scenarios
+	 *  - check Post call works as expected
+	 *  	- returns CREATED
+	 * 		- check data is persisted when a checksum is valid
+	 *  - check Post call fails when checksum ivnvalid
+	 *  	- verify data is not persisted when a checksum is invalid
+	 *  	- returns another status code - 403? 422? 418?
+	 *  - check malformed request fails (500)
+	 *  - test database transaction rollbacks? (other tests)
+	 */
 }

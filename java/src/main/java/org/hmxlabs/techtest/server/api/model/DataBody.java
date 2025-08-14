@@ -7,13 +7,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 
 @JsonSerialize(as = DataBody.class)
 @JsonDeserialize(as = DataBody.class)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class DataBody {
+public class DataBody implements Serializable {
 
     @NotNull
     private String dataBody;

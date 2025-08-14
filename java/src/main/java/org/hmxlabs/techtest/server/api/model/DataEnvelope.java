@@ -8,13 +8,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 
 @JsonSerialize(as = DataEnvelope.class)
 @JsonDeserialize(as = DataEnvelope.class)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class DataEnvelope {
+public class DataEnvelope implements Serializable {
 
     @NotNull
     @Valid

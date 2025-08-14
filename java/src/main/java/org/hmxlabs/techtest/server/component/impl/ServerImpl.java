@@ -9,6 +9,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.SerializationUtils;
+
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 @Slf4j
 @Service
@@ -25,12 +30,25 @@ public class ServerImpl implements Server {
     @Override
     public boolean saveDataEnvelope(DataEnvelope envelope) {
 
+        // generate checksum
+        // compare checksum
+        // if checksum valid persist data
+        // return true if checksum valid/data transaction successful
+
+
         // Save to persistence.
         persist(envelope);
 
         log.info("Data persisted successfully, data name: {}", envelope.getDataHeader().getName());
-        return true;
+        return false;
     }
+
+    public String generateMd5ChecksumHeader(DataEnvelope dataEnvelope) throws NoSuchAlgorithmException {
+        byte[] dataEnvelopeBytes = SerializationUtils.serialize(dataEnvelope);
+        byte[] hash = MessageDigest.getInstance("MD5").digest(dataEnvelopeBytes);
+        return "md5=" + new BigInteger(1, hash).toString(16);
+    }
+
 
     private void persist(DataEnvelope envelope) {
         log.info("Persisting data with attribute name: {}", envelope.getDataHeader().getName());
@@ -45,5 +63,6 @@ public class ServerImpl implements Server {
     private void saveData(DataBodyEntity dataBodyEntity) {
         dataBodyServiceImpl.saveDataBody(dataBodyEntity);
     }
+
 
 }

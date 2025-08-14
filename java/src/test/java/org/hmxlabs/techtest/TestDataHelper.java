@@ -1,6 +1,5 @@
 package org.hmxlabs.techtest;
 
-import lombok.SneakyThrows;
 import org.hmxlabs.techtest.server.api.model.DataBody;
 import org.hmxlabs.techtest.server.api.model.DataEnvelope;
 import org.hmxlabs.techtest.server.api.model.DataHeader;
@@ -11,6 +10,7 @@ import org.springframework.util.SerializationUtils;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 
 public class TestDataHelper {
@@ -42,8 +42,7 @@ public class TestDataHelper {
         return dataEnvelope;
     }
 
-    @SneakyThrows
-    public String generateMd5ChecksumHeader(DataEnvelope dataEnvelope) {
+    public static String generateMd5ChecksumHeader(DataEnvelope dataEnvelope) throws NoSuchAlgorithmException {
         byte[] dataEnvelopeBytes = SerializationUtils.serialize(dataEnvelope);
         byte[] hash = MessageDigest.getInstance("MD5").digest(dataEnvelopeBytes);
         return "md5=" + new BigInteger(1, hash).toString(16);
