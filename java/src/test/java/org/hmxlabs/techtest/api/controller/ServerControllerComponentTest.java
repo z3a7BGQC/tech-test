@@ -74,6 +74,7 @@ public class ServerControllerComponentTest {
 
 		boolean checksumPass = Boolean.parseBoolean(mvcResult.getResponse().getContentAsString());
 		assertThat(checksumPass).isTrue();
+//		assertThat() test for header?
 	}
 
 	@Test
@@ -92,8 +93,9 @@ public class ServerControllerComponentTest {
 	 * 		- check data is persisted when a checksum is valid
 	 *  - check Post call fails when checksum ivnvalid
 	 *  	- verify data is not persisted when a checksum is invalid
-	 *  	- returns another status code - 403? 422? 418?
+	 *  	- returns another status code - 403? 422? 418? -> 403, also return Want-Content-Digest header back
 	 *  - check malformed request fails (500)
+	 *  	- header malformed, data envelope malformed
 	 *  - test database transaction rollbacks? (other tests)
 	 */
 }

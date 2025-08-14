@@ -28,7 +28,7 @@ public class ServerImpl implements Server {
      * @return true if there is a match with the client provided checksum.
      */
     @Override
-    public boolean saveDataEnvelope(DataEnvelope envelope) {
+    public boolean saveDataEnvelope(DataEnvelope envelope, String contentDigest) {
 
         // generate checksum
         // compare checksum
@@ -43,7 +43,9 @@ public class ServerImpl implements Server {
         return false;
     }
 
-    public String generateMd5ChecksumHeader(DataEnvelope dataEnvelope) throws NoSuchAlgorithmException {
+    public
+
+    public String isChecksumValid(DataEnvelope dataEnvelope, String md5Checksum) throws NoSuchAlgorithmException {
         byte[] dataEnvelopeBytes = SerializationUtils.serialize(dataEnvelope);
         byte[] hash = MessageDigest.getInstance("MD5").digest(dataEnvelopeBytes);
         return "md5=" + new BigInteger(1, hash).toString(16);
@@ -63,6 +65,8 @@ public class ServerImpl implements Server {
     private void saveData(DataBodyEntity dataBodyEntity) {
         dataBodyServiceImpl.saveDataBody(dataBodyEntity);
     }
+
+    // would like to maybe
 
 
 }
