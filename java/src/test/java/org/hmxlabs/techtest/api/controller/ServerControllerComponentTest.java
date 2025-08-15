@@ -42,7 +42,8 @@ public class ServerControllerComponentTest {
 	private ObjectMapper objectMapper;
 	private MockMvc mockMvc;
 	private ServerController serverController;
-	private String testDataEnvelopeChecksumHeader;
+	private String testDataEnvelopeValidChecksumHeader;
+	private String testDataEnvelopeInvalidChecksumHeader;
 
 	@BeforeEach
 	@SneakyThrows
@@ -55,7 +56,8 @@ public class ServerControllerComponentTest {
 
 		testDataEnvelope = TestDataHelper.createTestDataEnvelopeApiObject();
 
-		testDataEnvelopeChecksumHeader = TestDataHelper.generateMd5ChecksumHeader(testDataEnvelope);
+		testDataEnvelopeValidChecksumHeader = TestDataHelper.generateMd5ChecksumHeader(testDataEnvelope);
+		testDataEnvelopeInvalidChecksumHeader = "thisWillMakeItInvalid" + testDataEnvelopeValidChecksumHeader;
 
 //		when(serverMock.saveDataEnvelope(any(DataEnvelope.class))).thenReturn(true);
 	}
@@ -68,7 +70,7 @@ public class ServerControllerComponentTest {
 		MvcResult mvcResult = mockMvc.perform(post(URI_PUSHDATA)
 				.content(testDataEnvelopeJson)
 				.contentType(MediaType.APPLICATION_JSON_VALUE)
-						.header("Content-Digest", testDataEnvelopeChecksumHeader))
+						.header("Content-Digest", testDataEnvelopeValidChecksumHeader))
 				.andExpect(status().isOk())
 				.andReturn();
 
@@ -78,7 +80,18 @@ public class ServerControllerComponentTest {
 	}
 
 	@Test
-	public void testSaveDataEnvelopeInvalidChecksum() {
+	public void testSaveDataEnvelopeInvalidChecksum() throws Exception {
+		String testDataEnvelopeJson = objectMapper.writeValueAsString(testDataEnvelope);
+
+		MvcResult mvcResult = mockMvc.perform(post(URI_PUSHDATA)
+						.content(testDataEnvelopeJson)
+						.contentType(MediaType.APPLICATION_JSON_VALUE)
+						.header("Content-Digest", testDataEnvelopeInvalidChecksumHeader))
+				.andExpect(status().isOk())
+				.andReturn();
+
+		boolean checksumPass = Boolean.parseBoolean(mvcResult.getResponse().getContentAsString());
+		assertThat(checksumPass).isFalse();
 
 	}
 
