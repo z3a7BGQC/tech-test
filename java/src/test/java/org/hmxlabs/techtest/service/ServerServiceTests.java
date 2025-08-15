@@ -30,6 +30,7 @@ public class ServerServiceTests {
     private ModelMapper modelMapper;
 
     private DataBodyEntity expectedDataBodyEntity;
+    private DataBodyEntity expectedDataBodyEntity2;
     private DataEnvelope testDataEnvelope;
     private DataEnvelope testDataEnvelopeInvalidChecksum;
 
@@ -64,6 +65,6 @@ public class ServerServiceTests {
         boolean success = server.saveDataEnvelope(testDataEnvelopeInvalidChecksum);
 
         assertThat(success).isFalse();
-        verifyNoInteractions(dataBodyServiceImplMock).saveDataBody(eq(expectedDataBodyEntity2));
+        verify(dataBodyServiceImplMock, never()).saveDataBody(eq(expectedDataBodyEntity2));
     }
 }
