@@ -16,7 +16,7 @@ public class DataEnvelopeTests {
 
     @Test
     public void assignDataHeaderFieldsShouldWorkAsExpected() {
-        DataHeader dataHeader = new DataHeader(TEST_NAME, BlockTypeEnum.BLOCKTYPEA,M5D_CHECKSUM);
+        DataHeader dataHeader = new DataHeader(TEST_NAME, BlockTypeEnum.BLOCKTYPEA, VALID_M5D_CHECKSUM);
         DataBody dataBody = new DataBody(DUMMY_DATA);
 
         DataEnvelope dataEnvelope = new DataEnvelope(dataHeader, dataBody);

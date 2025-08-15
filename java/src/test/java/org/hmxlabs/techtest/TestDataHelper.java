@@ -6,11 +6,7 @@ import org.hmxlabs.techtest.server.api.model.DataHeader;
 import org.hmxlabs.techtest.server.persistence.BlockTypeEnum;
 import org.hmxlabs.techtest.server.persistence.model.DataBodyEntity;
 import org.hmxlabs.techtest.server.persistence.model.DataHeaderEntity;
-import org.springframework.util.SerializationUtils;
 
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 
 public class TestDataHelper {
@@ -18,7 +14,8 @@ public class TestDataHelper {
     public static final String TEST_NAME = "Test";
     public static final String TEST_NAME_EMPTY = "";
     public static final String DUMMY_DATA = "AKCp5fU4WNWKBVvhXsbNhqk33tawri9iJUkA5o4A6YqpwvAoYjajVw8xdEw6r9796h1wEp29D";
-    public static final String M5D_CHECKSUM = "cecfd3953783df706878aaec2c22aa70";
+    public static final String VALID_M5D_CHECKSUM = "cecfd3953783df706878aaec2c22aa70";
+    public static final String INVALID_M5D_CHECKSUM = "notvalid3783df706878aaec2c22aa70";
 
     public static DataHeaderEntity createTestDataHeaderEntity(Instant expectedTimestamp) {
         DataHeaderEntity dataHeaderEntity = new DataHeaderEntity();
@@ -37,7 +34,15 @@ public class TestDataHelper {
 
     public static DataEnvelope createTestDataEnvelopeApiObject() {
         DataBody dataBody = new DataBody(DUMMY_DATA);
-        DataHeader dataHeader = new DataHeader(TEST_NAME, BlockTypeEnum.BLOCKTYPEA, M5D_CHECKSUM);
+        DataHeader dataHeader = new DataHeader(TEST_NAME, BlockTypeEnum.BLOCKTYPEA, VALID_M5D_CHECKSUM);
+
+        DataEnvelope dataEnvelope = new DataEnvelope(dataHeader, dataBody);
+        return dataEnvelope;
+    }
+
+    public static DataEnvelope createTestDataEnvelopeApiObjectWithInvalidChecksum() {
+        DataBody dataBody = new DataBody(DUMMY_DATA);
+        DataHeader dataHeader = new DataHeader(TEST_NAME, BlockTypeEnum.BLOCKTYPEA, INVALID_M5D_CHECKSUM);
 
         DataEnvelope dataEnvelope = new DataEnvelope(dataHeader, dataBody);
         return dataEnvelope;
@@ -45,7 +50,7 @@ public class TestDataHelper {
 
     public static DataEnvelope createTestDataEnvelopeApiObjectWithEmptyName() {
         DataBody dataBody = new DataBody(DUMMY_DATA);
-        DataHeader dataHeader = new DataHeader(TEST_NAME_EMPTY, BlockTypeEnum.BLOCKTYPEA, M5D_CHECKSUM);
+        DataHeader dataHeader = new DataHeader(TEST_NAME_EMPTY, BlockTypeEnum.BLOCKTYPEA, VALID_M5D_CHECKSUM);
 
         DataEnvelope dataEnvelope = new DataEnvelope(dataHeader, dataBody);
         return dataEnvelope;

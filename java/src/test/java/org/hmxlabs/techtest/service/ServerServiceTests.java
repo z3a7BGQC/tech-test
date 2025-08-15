@@ -19,6 +19,7 @@ import java.security.NoSuchAlgorithmException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hmxlabs.techtest.TestDataHelper.createTestDataEnvelopeApiObject;
+import static org.hmxlabs.techtest.TestDataHelper.createTestDataEnvelopeApiObjectWithInvalidChecksum;
 
 @ExtendWith(MockitoExtension.class)
 public class ServerServiceTests {
@@ -30,6 +31,7 @@ public class ServerServiceTests {
 
     private DataBodyEntity expectedDataBodyEntity;
     private DataEnvelope testDataEnvelope;
+    private DataEnvelope testDataEnvelopeInvalidChecksum;
 
     private Server server;
 
@@ -42,6 +44,10 @@ public class ServerServiceTests {
         expectedDataBodyEntity = modelMapper.map(testDataEnvelope.getDataBody(), DataBodyEntity.class);
         expectedDataBodyEntity.setDataHeaderEntity(modelMapper.map(testDataEnvelope.getDataHeader(), DataHeaderEntity.class));
 
+        testDataEnvelopeInvalidChecksum = createTestDataEnvelopeApiObjectWithInvalidChecksum();
+        expectedDataBodyEntity = modelMapper.map(testDataEnvelopeInvalidChecksum.getDataBody(), DataBodyEntity.class);
+        expectedDataBodyEntity.setDataHeaderEntity(modelMapper.map(testDataEnvelopeInvalidChecksum.getDataHeader(), DataHeaderEntity.class));
+
         server = new ServerImpl(dataBodyServiceImplMock, modelMapper);
     }
 
@@ -50,6 +56,14 @@ public class ServerServiceTests {
         boolean success = server.saveDataEnvelope(testDataEnvelope);
 
         assertThat(success).isTrue();
+        //verify(dataBodyServiceImplMock, times(1)).saveDataBody(eq(expectedDataBodyEntity));
+    }
+
+    @Test
+    public void shouldNotSaveDataEnvelopeInvalidChecksum() {
+        boolean success = server.saveDataEnvelope(testDataEnvelopeInvalidChecksum);
+
+        assertThat(success).isFalse();
         //verify(dataBodyServiceImplMock, times(1)).saveDataBody(eq(expectedDataBodyEntity));
     }
 }
