@@ -40,11 +40,9 @@ public class ClientImpl implements Client {
     public void pushData(DataEnvelope dataEnvelope) {
         log.info("Pushing data {} to {}", dataEnvelope.getDataHeader().getName(), URI_PUSHDATA);
         RestClient restClient = RestClient.create();
-        String md5ChecksumHeaderValue = "md5=" + generateMd5Checksum(dataEnvelope);
         ResponseEntity<Void> response = restClient.post()
                 .uri(URI_PUSHDATA)
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Content-Digest", md5ChecksumHeaderValue)
                 .body(dataEnvelope)
                 .retrieve()
                 .toBodilessEntity();
@@ -71,14 +69,5 @@ public class ClientImpl implements Client {
         log.info("Updating blocktype to {} for block with name {}", newBlockType, blockName);
         return true;
     }
-
-    @SneakyThrows // used SneakyThrows because as I am passing the constant digest algorithm from a constant it is very unlikely to throw this error
-    public String generateMd5Checksum(DataEnvelope dataEnvelope) {
-        log.info("Generating MD5 checksum for {}", dataEnvelope.getDataHeader().getName());
-        byte[] dataEnvelopeBytes = SerializationUtils.serialize(dataEnvelope);
-        byte[] hash = MessageDigest.getInstance(DIGEST_ALGORITHM).digest(dataEnvelopeBytes);
-        return new BigInteger(1, hash).toString(16);
-    }
-
 
 }
