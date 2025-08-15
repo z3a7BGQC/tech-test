@@ -14,9 +14,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 
+
+import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hmxlabs.techtest.TestDataHelper.createTestDataEnvelopeApiObject;
 import static org.hmxlabs.techtest.TestDataHelper.createTestDataEnvelopeApiObjectWithInvalidChecksum;
@@ -45,8 +45,8 @@ public class ServerServiceTests {
         expectedDataBodyEntity.setDataHeaderEntity(modelMapper.map(testDataEnvelope.getDataHeader(), DataHeaderEntity.class));
 
         testDataEnvelopeInvalidChecksum = createTestDataEnvelopeApiObjectWithInvalidChecksum();
-        expectedDataBodyEntity = modelMapper.map(testDataEnvelopeInvalidChecksum.getDataBody(), DataBodyEntity.class);
-        expectedDataBodyEntity.setDataHeaderEntity(modelMapper.map(testDataEnvelopeInvalidChecksum.getDataHeader(), DataHeaderEntity.class));
+        expectedDataBodyEntity2 = modelMapper.map(testDataEnvelopeInvalidChecksum.getDataBody(), DataBodyEntity.class);
+        expectedDataBodyEntity2.setDataHeaderEntity(modelMapper.map(testDataEnvelopeInvalidChecksum.getDataHeader(), DataHeaderEntity.class));
 
         server = new ServerImpl(dataBodyServiceImplMock, modelMapper);
     }
@@ -56,7 +56,7 @@ public class ServerServiceTests {
         boolean success = server.saveDataEnvelope(testDataEnvelope);
 
         assertThat(success).isTrue();
-        //verify(dataBodyServiceImplMock, times(1)).saveDataBody(eq(expectedDataBodyEntity));
+        verify(dataBodyServiceImplMock, times(1)).saveDataBody(eq(expectedDataBodyEntity));
     }
 
     @Test
@@ -64,6 +64,6 @@ public class ServerServiceTests {
         boolean success = server.saveDataEnvelope(testDataEnvelopeInvalidChecksum);
 
         assertThat(success).isFalse();
-        //verify(dataBodyServiceImplMock, times(1)).saveDataBody(eq(expectedDataBodyEntity));
+        verifyNoInteractions(dataBodyServiceImplMock).saveDataBody(eq(expectedDataBodyEntity2));
     }
 }
