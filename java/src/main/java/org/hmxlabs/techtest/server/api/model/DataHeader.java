@@ -8,15 +8,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-
 
 @JsonSerialize(as = DataHeader.class)
 @JsonDeserialize(as = DataHeader.class)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class DataHeader implements Serializable {
+public class DataHeader {
 
     @NotBlank
     private String name;

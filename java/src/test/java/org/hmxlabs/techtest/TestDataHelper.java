@@ -56,12 +56,4 @@ public class TestDataHelper {
         return dataEnvelope;
     }
 
-//    public static String createMd5Checksum(DataBody dataBody) throws NoSuchAlgorithmException {
-//        byte[] dataBodyBytes = SerializationUtils.serialize(dataBody);
-//        byte[] hash = MessageDigest.getInstance("MD5").digest(dataBodyBytes);
-//        return new BigInteger(1, hash).toString(16);
-//    }
-//
-
-
 }

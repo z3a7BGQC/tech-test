@@ -23,6 +23,7 @@ public class ServerImpl implements Server {
 
     private final DataBodyService dataBodyServiceImpl;
     private final ModelMapper modelMapper;
+    public static final String DIGEST_ALGORITHM = "MD5";
 
     /**
      * @param envelope
@@ -43,7 +44,7 @@ public class ServerImpl implements Server {
 
     private boolean isChecksumValid(DataEnvelope dataEnvelope) throws NoSuchAlgorithmException {
         byte[] dataBodyBytes = dataEnvelope.getDataBody().getDataBody().getBytes();
-        byte[] hash = MessageDigest.getInstance("MD5").digest(dataBodyBytes);
+        byte[] hash = MessageDigest.getInstance(DIGEST_ALGORITHM).digest(dataBodyBytes);
         String arrivedDataBodyChecksum = new BigInteger(1, hash).toString(16);
         return dataEnvelope.getDataHeader().getMd5Checksum().equals(arrivedDataBodyChecksum);
     }

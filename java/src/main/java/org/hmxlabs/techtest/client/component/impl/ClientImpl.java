@@ -33,7 +33,6 @@ public class ClientImpl implements Client {
     public static final String URI_PUSHDATA = "http://localhost:8090/dataserver/pushdata";
     public static final UriTemplate URI_GETDATA = new UriTemplate("http://localhost:8090/dataserver/data/{blockType}");
     public static final UriTemplate URI_PATCHDATA = new UriTemplate("http://localhost:8090/dataserver/update/{name}/{newBlockType}");
-    public static final String DIGEST_ALGORITHM = "MD5";
 
 
     @Override
