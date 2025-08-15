@@ -31,20 +31,22 @@ public class ServerImpl implements Server {
     @Override
     @SneakyThrows
     public boolean saveDataEnvelope(DataEnvelope envelope) {
+        boolean checksumValid = isChecksumValid(envelope);
 
-        // generate checksum
-        // compare checksum
-        // if checksum valid persist data
-        // return true if checksum valid/data transaction successful
-
-
-        // Save to persistence.
-        persist(envelope);
-
-        log.info("Data persisted successfully, data name: {}", envelope.getDataHeader().getName());
-        return true;
+        if (checksumValid) {
+            // Save to persistence.
+            persist(envelope);
+            log.info("Data persisted successfully, data name: {}", envelope.getDataHeader().getName());
+        }
+        return checksumValid;
     }
 
+    private boolean isChecksumValid(DataEnvelope dataEnvelope) throws NoSuchAlgorithmException {
+        byte[] dataBodyBytes = dataEnvelope.getDataBody().getDataBody().getBytes();
+        byte[] hash = MessageDigest.getInstance("MD5").digest(dataBodyBytes);
+        String arrivedDataBodyChecksum = new BigInteger(1, hash).toString(16);
+        return dataEnvelope.getDataHeader().getMd5Checksum().equals(arrivedDataBodyChecksum);
+    }
 
     private void persist(DataEnvelope envelope) {
         log.info("Persisting data with attribute name: {}", envelope.getDataHeader().getName());
@@ -64,3 +66,11 @@ public class ServerImpl implements Server {
 
 
 }
+ /*
+    I realised in order to persist the checksum I had a few options:
+       - worst: calculate the checksum twice in the controller and server layers
+       - better: add checksum to DTO - this should be client side as well so the DTOs are the same
+               - so I don't need the checksums in the header
+              - make sense as the checksum is not just metadata - its business data
+     I added the checksum to the DataHeader.
+  */

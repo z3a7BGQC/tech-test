@@ -45,6 +45,8 @@ public class DataHeaderEntity {
     @Enumerated(EnumType.STRING)
     private BlockTypeEnum blocktype;
 
+    @Column(name = "MD5_CHECKSUM")
+    private String md5Checksum;
 
     @Column(name = "CREATED_TIMESTAMP")
     @EqualsAndHashCode.Exclude private Instant createdTimestamp;

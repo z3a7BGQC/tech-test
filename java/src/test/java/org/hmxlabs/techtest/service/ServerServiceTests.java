@@ -46,7 +46,7 @@ public class ServerServiceTests {
     }
 
     @Test
-    public void shouldSaveDataEnvelopeAsExpected() throws NoSuchAlgorithmException, IOException {
+    public void shouldSaveDataEnvelopeAsExpected() {
         boolean success = server.saveDataEnvelope(testDataEnvelope);
 
         assertThat(success).isTrue();

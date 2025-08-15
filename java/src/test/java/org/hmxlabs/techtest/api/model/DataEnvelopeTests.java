@@ -9,15 +9,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hmxlabs.techtest.TestDataHelper.DUMMY_DATA;
-import static org.hmxlabs.techtest.TestDataHelper.TEST_NAME;
+import static org.hmxlabs.techtest.TestDataHelper.*;
 
 @ExtendWith(MockitoExtension.class)
 public class DataEnvelopeTests {
 
     @Test
     public void assignDataHeaderFieldsShouldWorkAsExpected() {
-        DataHeader dataHeader = new DataHeader(TEST_NAME, BlockTypeEnum.BLOCKTYPEA);
+        DataHeader dataHeader = new DataHeader(TEST_NAME, BlockTypeEnum.BLOCKTYPEA,M5D_CHECKSUM);
         DataBody dataBody = new DataBody(DUMMY_DATA);
 
         DataEnvelope dataEnvelope = new DataEnvelope(dataHeader, dataBody);

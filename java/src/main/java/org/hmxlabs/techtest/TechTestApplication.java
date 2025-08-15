@@ -57,7 +57,7 @@ public class TechTestApplication {
 
 		DataBody dataBody = new DataBody(DUMMY_DATA);
 
-		DataHeader dataHeader = new DataHeader(HEADER_NAME, BlockTypeEnum.BLOCKTYPEA);
+		DataHeader dataHeader = new DataHeader(HEADER_NAME, BlockTypeEnum.BLOCKTYPEA, MD5_CHECKSUM);
 
 		DataEnvelope dataEnvelope = new DataEnvelope(dataHeader, dataBody);
 

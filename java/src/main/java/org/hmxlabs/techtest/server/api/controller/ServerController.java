@@ -31,28 +31,14 @@ public class ServerController {
     private final Server server;
 
     @PostMapping(value = "/pushdata", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> pushData(@Valid @RequestBody DataEnvelope dataEnvelope, @RequestHeader("Content-Digest") String contentDigest) throws IOException, NoSuchAlgorithmException {
+    public ResponseEntity<Boolean> pushData(@Valid @RequestBody DataEnvelope dataEnvelope) {
 
         log.info("Data envelope received: {}", dataEnvelope.getDataHeader().getName());
-        Boolean checksumPass = isChecksumValid(dataEnvelope, contentDigest);
+        boolean checksumPass = server.saveDataEnvelope(dataEnvelope);
 
-        if (checksumPass) {
-            server.saveDataEnvelope(dataEnvelope);
-            log.info("Data envelope persisted. Attribute name: {}", dataEnvelope.getDataHeader().getName());
-//            return ResponseEntity.Created()
-        }
-        return ResponseEntity.ok(checksumPass); // change to CREATED status if successful checksum?
+        log.info("Data envelope persisted. Attribute name: {}", dataEnvelope.getDataHeader().getName());
+        return ResponseEntity.ok(checksumPass); // change to CREATED status if successful checksum? FORBIDDEN if invalid? & send back Want-Content-Digest Header
     }
-
-    private boolean isChecksumValid(DataEnvelope dataEnvelope, String contentDigest) throws NoSuchAlgorithmException {
-        byte[] dataEnvelopeBytes = SerializationUtils.serialize(dataEnvelope);
-        byte[] hash = MessageDigest.getInstance("MD5").digest(dataEnvelopeBytes);
-        return contentDigest.equals("md5=" + new BigInteger(1, hash).toString(16));
-    }
-
-
-
-
 
 }
 
@@ -64,6 +50,7 @@ public class ServerController {
     Unsure where to do the checksum validation - passing it to ServerImpl means changing the interface, which I am suspect of
     Could keep it in Controller layer? -> Yes, makes sense to keep validation here so invalid data doesn't go further.
     It also separates concerns so that ServerImpl has the core focus of saving the data.
+    This means that we will calculate the checksum twice - once in controller layer to verify and 2nd in sever layer to save and persist
 
     Should I change the ResponseEntity - it's currently a boolean.
     Possibilities: alternative statuses of 200 CREATED and 403 FORBIDDEN based on the checksum?

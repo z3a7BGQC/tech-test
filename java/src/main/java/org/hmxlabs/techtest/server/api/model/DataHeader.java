@@ -23,4 +23,6 @@ public class DataHeader implements Serializable {
 
     private BlockTypeEnum blockType;
 
+    private String md5Checksum;
+
 }

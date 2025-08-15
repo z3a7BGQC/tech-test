@@ -23,7 +23,7 @@ import java.security.NoSuchAlgorithmException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
@@ -56,10 +56,7 @@ public class ServerControllerComponentTest {
 
 		testDataEnvelope = TestDataHelper.createTestDataEnvelopeApiObject();
 
-		testDataEnvelopeValidChecksumHeader = TestDataHelper.generateMd5ChecksumHeader(testDataEnvelope);
 		testDataEnvelopeInvalidChecksumHeader = "thisWillMakeItInvalid" + testDataEnvelopeValidChecksumHeader;
-
-//		when(serverMock.saveDataEnvelope(any(DataEnvelope.class))).thenReturn(true);
 	}
 
 	@Test
@@ -67,43 +64,46 @@ public class ServerControllerComponentTest {
 
 		String testDataEnvelopeJson = objectMapper.writeValueAsString(testDataEnvelope);
 
+		when(serverMock.saveDataEnvelope(any(DataEnvelope.class))).thenReturn(true);
+
 		MvcResult mvcResult = mockMvc.perform(post(URI_PUSHDATA)
 				.content(testDataEnvelopeJson)
-				.contentType(MediaType.APPLICATION_JSON_VALUE)
-						.header("Content-Digest", testDataEnvelopeValidChecksumHeader))
+				.contentType(MediaType.APPLICATION_JSON_VALUE))
 				.andExpect(status().isOk())
 				.andReturn();
 
 		boolean checksumPass = Boolean.parseBoolean(mvcResult.getResponse().getContentAsString());
 		assertThat(checksumPass).isTrue();
-//		assertThat() test for header?
 	}
 
 	@Test
-	public void testSaveDataEnvelopeInvalidChecksum() throws Exception {
+	public void testPushDataPostCallWorksAsExpectedInvalidChecksum() throws Exception {
 		String testDataEnvelopeJson = objectMapper.writeValueAsString(testDataEnvelope);
+
+		when(serverMock.saveDataEnvelope(any(DataEnvelope.class))).thenReturn(false);
 
 		MvcResult mvcResult = mockMvc.perform(post(URI_PUSHDATA)
 						.content(testDataEnvelopeJson)
-						.contentType(MediaType.APPLICATION_JSON_VALUE)
-						.header("Content-Digest", testDataEnvelopeInvalidChecksumHeader))
+						.contentType(MediaType.APPLICATION_JSON_VALUE))
 				.andExpect(status().isOk())
 				.andReturn();
 
 		boolean checksumPass = Boolean.parseBoolean(mvcResult.getResponse().getContentAsString());
 		assertThat(checksumPass).isFalse();
-
 	}
 
 	/** Test Scenarios
+	 *
+	 *  For controller tests:
 	 *  - check Post call works as expected
-	 *  	- returns CREATED
-	 * 		- check data is persisted when a checksum is valid
-	 *  - check Post call fails when checksum ivnvalid
+	 *  	- returns ok
+	 * 		- check data is persisted when a checksum is valid <- not to be tested at this layer
+	 *  - check Post call fails when checksum invalid
 	 *  	- verify data is not persisted when a checksum is invalid
 	 *  	- returns another status code - 403? 422? 418? -> 403, also return Want-Content-Digest header back
-	 *  - check malformed request fails (500)
+	 *  - check malformed request fails (500) ??
 	 *  	- header malformed, data envelope malformed
-	 *  - test database transaction rollbacks? (other tests)
+	 *  - test database transaction rollbacks? (other tests) <- not to be tested at this layer
 	 */
+
 }

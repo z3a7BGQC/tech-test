@@ -18,6 +18,7 @@ public class TestDataHelper {
     public static final String TEST_NAME = "Test";
     public static final String TEST_NAME_EMPTY = "";
     public static final String DUMMY_DATA = "AKCp5fU4WNWKBVvhXsbNhqk33tawri9iJUkA5o4A6YqpwvAoYjajVw8xdEw6r9796h1wEp29D";
+    public static final String M5D_CHECKSUM = "cecfd3953783df706878aaec2c22aa70";
 
     public static DataHeaderEntity createTestDataHeaderEntity(Instant expectedTimestamp) {
         DataHeaderEntity dataHeaderEntity = new DataHeaderEntity();
@@ -36,23 +37,26 @@ public class TestDataHelper {
 
     public static DataEnvelope createTestDataEnvelopeApiObject() {
         DataBody dataBody = new DataBody(DUMMY_DATA);
-        DataHeader dataHeader = new DataHeader(TEST_NAME, BlockTypeEnum.BLOCKTYPEA);
+        DataHeader dataHeader = new DataHeader(TEST_NAME, BlockTypeEnum.BLOCKTYPEA, M5D_CHECKSUM);
 
         DataEnvelope dataEnvelope = new DataEnvelope(dataHeader, dataBody);
         return dataEnvelope;
-    }
-
-    public static String generateMd5ChecksumHeader(DataEnvelope dataEnvelope) throws NoSuchAlgorithmException {
-        byte[] dataEnvelopeBytes = SerializationUtils.serialize(dataEnvelope);
-        byte[] hash = MessageDigest.getInstance("MD5").digest(dataEnvelopeBytes);
-        return "md5=" + new BigInteger(1, hash).toString(16);
     }
 
     public static DataEnvelope createTestDataEnvelopeApiObjectWithEmptyName() {
         DataBody dataBody = new DataBody(DUMMY_DATA);
-        DataHeader dataHeader = new DataHeader(TEST_NAME_EMPTY, BlockTypeEnum.BLOCKTYPEA);
+        DataHeader dataHeader = new DataHeader(TEST_NAME_EMPTY, BlockTypeEnum.BLOCKTYPEA, M5D_CHECKSUM);
 
         DataEnvelope dataEnvelope = new DataEnvelope(dataHeader, dataBody);
         return dataEnvelope;
     }
+
+//    public static String createMd5Checksum(DataBody dataBody) throws NoSuchAlgorithmException {
+//        byte[] dataBodyBytes = SerializationUtils.serialize(dataBody);
+//        byte[] hash = MessageDigest.getInstance("MD5").digest(dataBodyBytes);
+//        return new BigInteger(1, hash).toString(16);
+//    }
+//
+
+
 }
