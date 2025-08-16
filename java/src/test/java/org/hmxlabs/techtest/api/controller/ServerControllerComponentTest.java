@@ -1,5 +1,6 @@
 package org.hmxlabs.techtest.api.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.SneakyThrows;
 import org.hmxlabs.techtest.TestDataHelper;
 import org.hmxlabs.techtest.server.api.controller.ServerController;
@@ -7,6 +8,9 @@ import org.hmxlabs.techtest.server.api.model.DataEnvelope;
 import org.hmxlabs.techtest.server.component.Server;
 import org.hmxlabs.techtest.server.exception.HadoopClientException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hmxlabs.techtest.server.persistence.BlockTypeEnum;
+import org.hmxlabs.techtest.server.persistence.model.DataBodyEntity;
+import org.hmxlabs.techtest.server.persistence.model.DataHeaderEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,25 +24,36 @@ import org.springframework.web.util.UriTemplate;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hmxlabs.techtest.TestDataHelper.createTestDataBodyEntity;
+import static org.hmxlabs.techtest.TestDataHelper.createTestDataHeaderEntity;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 @ExtendWith(MockitoExtension.class)
 public class ServerControllerComponentTest {
 
 	public static final String URI_PUSHDATA = "http://localhost:8090/dataserver/pushdata";
-	public static final UriTemplate URI_GETDATA = new UriTemplate("http://localhost:8090/dataserver/data/{blockType}");
+	public static final String URI_GETDATA = "http://localhost:8090/dataserver/data/{blockType}";
 	public static final UriTemplate URI_PATCHDATA = new UriTemplate("http://localhost:8090/dataserver/update/{name}/{newBlockType}");
 
 	@Mock
 	private Server serverMock;
 
 	private DataEnvelope testDataEnvelope;
+	private DataBodyEntity testDataBody;
+	private List<DataBodyEntity> testDataBodyList;
 	private ObjectMapper objectMapper;
 	private MockMvc mockMvc;
 	private ServerController serverController;
@@ -53,6 +68,11 @@ public class ServerControllerComponentTest {
 				.build();
 
 		testDataEnvelope = TestDataHelper.createTestDataEnvelopeApiObject();
+
+		DataHeaderEntity testDataHeaderEntity = createTestDataHeaderEntity(Instant.now());
+		testDataBody = createTestDataBodyEntity(testDataHeaderEntity);
+
+		testDataBodyList = Collections.singletonList(testDataBody);
 	}
 
 	@Test
@@ -86,6 +106,20 @@ public class ServerControllerComponentTest {
 
 		boolean checksumPass = Boolean.parseBoolean(mvcResult.getResponse().getContentAsString());
 		assertThat(checksumPass).isFalse();
+	}
+
+	@Test
+	public void testGetDataByBlockTypeCallWorksAsExpected() throws Exception {
+
+		String testDataBodyListJson = objectMapper.writeValueAsString(testDataBodyList);
+
+		when(serverMock.getDataByBlockType(any(BlockTypeEnum.class))).thenReturn(testDataBodyList);
+
+		MvcResult mvcResult = mockMvc.perform(get(URI_GETDATA, BlockTypeEnum.BLOCKTYPEA)
+						.accept(MediaType.APPLICATION_JSON_VALUE))
+				.andExpect(status().isOk())
+				.andExpect(content().json(testDataBodyListJson))
+				.andReturn();
 	}
 
 	/** Test Scenarios

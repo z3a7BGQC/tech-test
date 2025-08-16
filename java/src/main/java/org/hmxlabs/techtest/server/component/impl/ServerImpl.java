@@ -2,6 +2,7 @@ package org.hmxlabs.techtest.server.component.impl;
 
 import lombok.SneakyThrows;
 import org.hmxlabs.techtest.server.api.model.DataEnvelope;
+import org.hmxlabs.techtest.server.persistence.BlockTypeEnum;
 import org.hmxlabs.techtest.server.persistence.model.DataBodyEntity;
 import org.hmxlabs.techtest.server.persistence.model.DataHeaderEntity;
 import org.hmxlabs.techtest.server.service.DataBodyService;
@@ -12,6 +13,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -41,6 +43,10 @@ public class ServerImpl implements Server {
         return checksumValid;
     }
 
+    public List<DataBodyEntity> getDataByBlockType(BlockTypeEnum blockTypeEnum){
+        return dataBodyServiceImpl.getDataByBlockType(blockTypeEnum);
+    }
+
     private boolean isChecksumValid(DataEnvelope dataEnvelope) throws NoSuchAlgorithmException {
         if (dataEnvelope.getDataHeader().getMd5Checksum() == null) {
             return false;
@@ -65,8 +71,6 @@ public class ServerImpl implements Server {
     private void saveData(DataBodyEntity dataBodyEntity) {
         dataBodyServiceImpl.saveDataBody(dataBodyEntity);
     }
-
-    // would like to maybe
 
 
 }

@@ -1,5 +1,6 @@
 package org.hmxlabs.techtest.server.api.controller;
 
+import org.apache.coyote.Response;
 import org.hmxlabs.techtest.server.api.model.DataBody;
 import org.hmxlabs.techtest.server.api.model.DataEnvelope;
 import org.hmxlabs.techtest.server.component.Server;
@@ -7,6 +8,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hmxlabs.techtest.server.persistence.BlockTypeEnum;
+import org.hmxlabs.techtest.server.persistence.model.DataBodyEntity;
+import org.hmxlabs.techtest.server.service.impl.DataBodyServiceImpl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -15,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Optional;
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -36,12 +39,13 @@ public class ServerController {
         return ResponseEntity.ok(checksumPass); // change to CREATED status if successful checksum? FORBIDDEN if invalid? & send back Want-Content-Digest Header
     }
 
-//    @GetMapping(value = "/data/{blockType}")
-//    public ResponseEntity<DataEnvelope[]> getDataByBlockType(@PathVariable BlockTypeEnum blockTypeEnum) {
-//
-//        log.info("Getting data envelopes of block type {}", blockTypeEnum);
-//        Optional<DataEnvelope[]>
-//    }
+    @GetMapping(value = "/data/{blockType}")
+    public ResponseEntity<List<DataBodyEntity>> getDataByBlockType(@PathVariable("blockType") BlockTypeEnum blockTypeEnum) {
+
+        log.info("Getting data envelopes of block type {}", blockTypeEnum);
+        return ResponseEntity.ok(server.getDataByBlockType(blockTypeEnum));
+                // what if blocktypeenum is wrong?
+    }
 
 }
 

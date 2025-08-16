@@ -8,6 +8,7 @@ import org.hmxlabs.techtest.server.persistence.model.DataBodyEntity;
 import org.hmxlabs.techtest.server.persistence.model.DataHeaderEntity;
 
 import java.time.Instant;
+import java.util.List;
 
 public class TestDataHelper {
 
@@ -63,5 +64,11 @@ public class TestDataHelper {
         DataEnvelope dataEnvelope = new DataEnvelope(dataHeader, dataBody);
         return dataEnvelope;
     }
+
+//    public static List<DataBodyEntity> createTestDataBodyEntityList() {
+//        List<DataBodyEntity> dataBodyEntities = new List<DataBodyEntity>;
+//
+//
+//    }
 
 }
