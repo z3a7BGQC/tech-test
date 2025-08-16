@@ -42,8 +42,6 @@ public class ServerControllerComponentTest {
 	private ObjectMapper objectMapper;
 	private MockMvc mockMvc;
 	private ServerController serverController;
-	private String testDataEnvelopeValidChecksumHeader;
-	private String testDataEnvelopeInvalidChecksumHeader;
 
 	@BeforeEach
 	@SneakyThrows
@@ -55,8 +53,6 @@ public class ServerControllerComponentTest {
 				.build();
 
 		testDataEnvelope = TestDataHelper.createTestDataEnvelopeApiObject();
-
-		testDataEnvelopeInvalidChecksumHeader = "thisWillMakeItInvalid" + testDataEnvelopeValidChecksumHeader;
 	}
 
 	@Test

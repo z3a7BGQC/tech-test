@@ -43,10 +43,14 @@ public class ServerImpl implements Server {
     }
 
     private boolean isChecksumValid(DataEnvelope dataEnvelope) throws NoSuchAlgorithmException {
-        byte[] dataBodyBytes = dataEnvelope.getDataBody().getDataBody().getBytes();
-        byte[] hash = MessageDigest.getInstance(DIGEST_ALGORITHM).digest(dataBodyBytes);
-        String arrivedDataBodyChecksum = new BigInteger(1, hash).toString(16);
-        return dataEnvelope.getDataHeader().getMd5Checksum().equals(arrivedDataBodyChecksum);
+        if (dataEnvelope.getDataHeader().getMd5Checksum() == null) {
+            return false;
+        } else {
+            byte[] dataBodyBytes = dataEnvelope.getDataBody().getDataBody().getBytes();
+            byte[] hash = MessageDigest.getInstance(DIGEST_ALGORITHM).digest(dataBodyBytes);
+            String arrivedDataBodyChecksum = new BigInteger(1, hash).toString(16);
+            return dataEnvelope.getDataHeader().getMd5Checksum().equals(arrivedDataBodyChecksum);
+        }
     }
 
     private void persist(DataEnvelope envelope) {

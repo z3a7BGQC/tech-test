@@ -48,6 +48,14 @@ public class TestDataHelper {
         return dataEnvelope;
     }
 
+    public static DataEnvelope createTestDataEnvelopeApiObjectNullChecksum() {
+        DataBody dataBody = new DataBody(DUMMY_DATA);
+        DataHeader dataHeader = new DataHeader(TEST_NAME, BlockTypeEnum.BLOCKTYPEA, null);
+
+        DataEnvelope dataEnvelope = new DataEnvelope(dataHeader, dataBody);
+        return dataEnvelope;
+    }
+
     public static DataEnvelope createTestDataEnvelopeApiObjectWithEmptyName() {
         DataBody dataBody = new DataBody(DUMMY_DATA);
         DataHeader dataHeader = new DataHeader(TEST_NAME_EMPTY, BlockTypeEnum.BLOCKTYPEA, VALID_M5D_CHECKSUM);

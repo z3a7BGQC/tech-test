@@ -15,11 +15,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 
+import static org.hmxlabs.techtest.TestDataHelper.*;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hmxlabs.techtest.TestDataHelper.createTestDataEnvelopeApiObject;
-import static org.hmxlabs.techtest.TestDataHelper.createTestDataEnvelopeApiObjectWithInvalidChecksum;
 
 @ExtendWith(MockitoExtension.class)
 public class ServerServiceTests {
@@ -31,8 +32,10 @@ public class ServerServiceTests {
 
     private DataBodyEntity expectedDataBodyEntity;
     private DataBodyEntity expectedDataBodyEntity2;
+    private DataBodyEntity expectedDataBodyEntity3;
     private DataEnvelope testDataEnvelope;
     private DataEnvelope testDataEnvelopeInvalidChecksum;
+    private DataEnvelope testDataEnvelopeNoChecksum;
 
     private Server server;
 
@@ -49,11 +52,15 @@ public class ServerServiceTests {
         expectedDataBodyEntity2 = modelMapper.map(testDataEnvelopeInvalidChecksum.getDataBody(), DataBodyEntity.class);
         expectedDataBodyEntity2.setDataHeaderEntity(modelMapper.map(testDataEnvelopeInvalidChecksum.getDataHeader(), DataHeaderEntity.class));
 
+        testDataEnvelopeNoChecksum = createTestDataEnvelopeApiObjectNullChecksum();
+        expectedDataBodyEntity3 = modelMapper.map(testDataEnvelopeNoChecksum.getDataBody(), DataBodyEntity.class);
+        expectedDataBodyEntity3.setDataHeaderEntity(modelMapper.map(testDataEnvelopeNoChecksum.getDataHeader(), DataHeaderEntity.class));
+
         server = new ServerImpl(dataBodyServiceImplMock, modelMapper);
     }
 
     @Test
-    public void shouldSaveDataEnvelopeAsExpected() {
+    public void shouldSaveDataEnvelopeAsExpected()throws IOException, NoSuchAlgorithmException {
         boolean success = server.saveDataEnvelope(testDataEnvelope);
 
         assertThat(success).isTrue();
@@ -61,10 +68,18 @@ public class ServerServiceTests {
     }
 
     @Test
-    public void shouldNotSaveDataEnvelopeInvalidChecksum() {
+    public void shouldNotSaveDataEnvelopeInvalidChecksum() throws IOException, NoSuchAlgorithmException {
         boolean success = server.saveDataEnvelope(testDataEnvelopeInvalidChecksum);
 
         assertThat(success).isFalse();
         verify(dataBodyServiceImplMock, never()).saveDataBody(eq(expectedDataBodyEntity2));
+    }
+
+    @Test
+    public void shouldNotSaveDataEnvelopeNoChecksum() throws IOException, NoSuchAlgorithmException {
+        boolean success = server.saveDataEnvelope(testDataEnvelopeNoChecksum);
+
+        assertThat(success).isFalse();
+        verify(dataBodyServiceImplMock, never()).saveDataBody(eq(expectedDataBodyEntity3));
     }
 }
