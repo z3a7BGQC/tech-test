@@ -5,6 +5,7 @@ import org.hmxlabs.techtest.client.api.model.DataEnvelope;
 import org.hmxlabs.techtest.client.component.Client;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -51,6 +52,10 @@ public class ClientImpl implements Client {
     @Override
     public List<DataEnvelope> getData(String blockType) {
         log.info("Query for data with header block type {}", blockType);
+        RestClient restClient = RestClient.create();
+        ResponseEntity<Void> response = restClient.get()
+                .uri(URI_PUSHDATA, blockType)
+                .retrieve().toEntity(Class);
         return null;
     }
 

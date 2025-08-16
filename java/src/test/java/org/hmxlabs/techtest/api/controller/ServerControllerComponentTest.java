@@ -112,7 +112,7 @@ public class ServerControllerComponentTest {
 	public void testGetDataByBlockTypeCallWorksAsExpected() throws Exception {
 
 		String testDataBodyListJson = objectMapper.writeValueAsString(testDataBodyList);
-
+		// TODO change it so I send a data envelope not a databodyentity
 		when(serverMock.getDataByBlockType(any(BlockTypeEnum.class))).thenReturn(testDataBodyList);
 
 		MvcResult mvcResult = mockMvc.perform(get(URI_GETDATA, BlockTypeEnum.BLOCKTYPEA)
