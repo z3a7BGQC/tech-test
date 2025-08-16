@@ -5,7 +5,9 @@ import org.hmxlabs.techtest.server.persistence.model.DataBodyEntity;
 import org.hmxlabs.techtest.server.persistence.repository.DataStoreRepository;
 import org.hmxlabs.techtest.server.service.DataBodyService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,8 +24,8 @@ public class DataBodyServiceImpl implements DataBodyService {
     }
 
     @Override
-    public List<DataBodyEntity> getDataByBlockType(BlockTypeEnum blockType) {
-        return null;
+    public List<DataBodyEntity> getDataByBlockType(BlockTypeEnum blocktype) {
+        return dataStoreRepository.findDataBodyEntityByDataHeaderEntityBlocktype(blocktype);
     }
 
     @Override
@@ -31,3 +33,7 @@ public class DataBodyServiceImpl implements DataBodyService {
         return null;
     }
 }
+
+/*
+
+ */

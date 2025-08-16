@@ -1,25 +1,21 @@
 package org.hmxlabs.techtest.server.api.controller;
 
+import org.hmxlabs.techtest.server.api.model.DataBody;
 import org.hmxlabs.techtest.server.api.model.DataEnvelope;
 import org.hmxlabs.techtest.server.component.Server;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
+import org.hmxlabs.techtest.server.persistence.BlockTypeEnum;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.SerializationUtils;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Optional;
 
 @Slf4j
 @Controller
@@ -39,6 +35,13 @@ public class ServerController {
         log.info("Data envelope persisted. Attribute name: {}", dataEnvelope.getDataHeader().getName());
         return ResponseEntity.ok(checksumPass); // change to CREATED status if successful checksum? FORBIDDEN if invalid? & send back Want-Content-Digest Header
     }
+
+//    @GetMapping(value = "/data/{blockType}")
+//    public ResponseEntity<DataEnvelope[]> getDataByBlockType(@PathVariable BlockTypeEnum blockTypeEnum) {
+//
+//        log.info("Getting data envelopes of block type {}", blockTypeEnum);
+//        Optional<DataEnvelope[]>
+//    }
 
 }
 

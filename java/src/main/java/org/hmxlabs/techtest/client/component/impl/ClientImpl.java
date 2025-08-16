@@ -8,17 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.client.RestClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriTemplate;
-
-import java.math.BigInteger;
-import java.security.MessageDigest;
-
 import org.springframework.http.MediaType;
-import org.springframework.http.HttpHeaders;
-import org.springframework.util.SerializationUtils;
-
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 /**
