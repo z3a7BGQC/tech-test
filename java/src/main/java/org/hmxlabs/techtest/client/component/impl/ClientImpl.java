@@ -10,10 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriTemplate;
 import org.springframework.http.MediaType;
-
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -53,7 +49,7 @@ public class ClientImpl implements Client {
 
     @Override
     public List<DataEnvelope> getData(String blockType) {
-        log.info("Query for data with header block type {}", blockType);
+        log.info("Query for data with block type string {} at {}", blockType, URI_GETDATA);
         RestClient restClient = RestClient.create();
         return restClient.get()
                 .uri(URI_GETDATA, blockType)

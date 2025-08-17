@@ -23,7 +23,7 @@ import java.util.List;
 
 import static org.hmxlabs.techtest.TestDataHelper.*;
 import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ServerServiceTests {
@@ -42,6 +42,7 @@ public class ServerServiceTests {
     private List<DataEnvelope> testDataEnvelopeList;
     private List<DataBodyEntity> testDataBodyEntityList;
     private final String TEST_BLOCKTYPEB_LOWERCASE = "blocktypeb";
+    private final String TEST_BLOCKTYPEC_LOWERCASE = "blocktypec";
 
     private Server server;
 
@@ -95,15 +96,22 @@ public class ServerServiceTests {
         when(dataBodyServiceImplMock.getDataByBlockType(any(BlockTypeEnum.class))).thenReturn(testDataBodyEntityList);
         List<DataEnvelope> actualDataEnvelopes = server.getDataByBlockType(TEST_BLOCKTYPEA_LOWERCASE);
 
-        assertThat(actualDataEnvelopes.equals(testDataEnvelopeList));
+        assertThat(actualDataEnvelopes).usingRecursiveFieldByFieldElementComparator().isEqualTo(testDataEnvelopeList);
         verify(dataBodyServiceImplMock, times(1)).getDataByBlockType(BlockTypeEnum.BLOCKTYPEA);
     }
 
-    @Test void shouldRetrieveNoDataByBlockTypeAsExpected() {
+    @Test void shouldRetrieveNullDataByBlockType() {
         List<DataEnvelope> actualDataEnvelopes = server.getDataByBlockType(TEST_BLOCKTYPEB_LOWERCASE);
 
-        assertThat(actualDataEnvelopes).isNull();
+        assertThat(actualDataEnvelopes).isEmpty();
         verify(dataBodyServiceImplMock, times(1)).getDataByBlockType(BlockTypeEnum.BLOCKTYPEB);
+    }
+
+    @Test void shouldRetrieveNoDataForInvalidBlockTypeEnum() {
+        List<DataEnvelope> actualDataEnvelopes = server.getDataByBlockType(TEST_BLOCKTYPEC_LOWERCASE);
+
+        assertThat(actualDataEnvelopes).isEmpty();
+        verify(dataBodyServiceImplMock, never()).getDataByBlockType(BlockTypeEnum.BLOCKTYPEB);
     }
 
 

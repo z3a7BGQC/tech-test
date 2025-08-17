@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -39,7 +40,6 @@ public class ServerImpl implements Server {
         boolean checksumValid = isChecksumValid(envelope);
 
         if (checksumValid) {
-            // Save to persistence.
             persist(envelope);
             log.info("Data persisted successfully, data name: {}", envelope.getDataHeader().getName());
         }
@@ -48,24 +48,22 @@ public class ServerImpl implements Server {
 
     public List<DataEnvelope> getDataByBlockType(String blockType){
         BlockTypeEnum blockTypeEnum = convertStringToEnum(blockType);
-        if (blockTypeEnum != null) {
-            List<DataBodyEntity> dataBodyEntityList = dataBodyServiceImpl.getDataByBlockType(blockTypeEnum);
-            if (dataBodyEntityList.isEmpty()) {
-                log.info("No data of block type {} found in data store", blockType);
-                return null;
-            } else {
-                log.info("Retrieved data of block type {} from data service", blockType);
-                if (packageDataBodyEntitiesIntoDataEnvelopes(dataBodyEntityList).isEmpty()) {
-                    return null;
-                } else return packageDataBodyEntitiesIntoDataEnvelopes(dataBodyEntityList);
-            }
+        if (blockTypeEnum == null) {
+            return Collections.emptyList();
         }
-        return null;
+        List<DataBodyEntity> dataBodyEntityList = dataBodyServiceImpl.getDataByBlockType(blockTypeEnum);
 
+        if (dataBodyEntityList.isEmpty()) {
+            log.info("No data of block type {} found in data store", blockType);
+            return Collections.emptyList();
+        }
+        log.info("Retrieved data of block type {} from data store", blockType);
+        List<DataEnvelope> dataEnvelopes = packageDataBodyEntitiesIntoDataEnvelopes(dataBodyEntityList);
+
+        return dataEnvelopes.isEmpty() ? Collections.emptyList() : dataEnvelopes;
     }
 
     private List<DataEnvelope> packageDataBodyEntitiesIntoDataEnvelopes(List<DataBodyEntity> dataBodyEntityList) {
-        log.info("Packaging data {} from data service", dataBodyEntityList);
         ArrayList<DataEnvelope> dataEnvelopes = new ArrayList<>();
         for ( DataBodyEntity i : dataBodyEntityList) {
             DataHeader dataHeader = modelMapper.map(i.getDataHeaderEntity(), DataHeader.class);
@@ -73,7 +71,7 @@ public class ServerImpl implements Server {
             DataEnvelope dataEnvelope = new DataEnvelope(dataHeader, dataBody);
             dataEnvelopes.add(dataEnvelope);
         }
-        log.info("Packaged envelope data {} from data service", dataEnvelopes.getFirst().getDataHeader().getName());
+        log.info("Successfully packaged envelope data {} from data store", dataEnvelopes.getFirst().getDataHeader().getName());
         return dataEnvelopes;
     }
 
@@ -88,7 +86,7 @@ public class ServerImpl implements Server {
     }
 
     private boolean isChecksumValid(DataEnvelope dataEnvelope) throws NoSuchAlgorithmException {
-        log.info("Validating checksum for data with attribute name {}", dataEnvelope.getDataHeader().getName());
+        log.info("Validating checksum for data with attribute name: {}", dataEnvelope.getDataHeader().getName());
         if (dataEnvelope.getDataHeader().getMd5Checksum() == null) {
             return false;
         } else {
