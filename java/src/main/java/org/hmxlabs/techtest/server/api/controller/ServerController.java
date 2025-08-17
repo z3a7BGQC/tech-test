@@ -8,8 +8,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hmxlabs.techtest.server.persistence.BlockTypeEnum;
-import org.hmxlabs.techtest.server.persistence.model.DataBodyEntity;
-import org.hmxlabs.techtest.server.service.impl.DataBodyServiceImpl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -40,10 +38,10 @@ public class ServerController {
     }
 
     @GetMapping(value = "/data/{blockType}")
-    public ResponseEntity<List<DataBodyEntity>> getDataByBlockType(@PathVariable("blockType") BlockTypeEnum blockTypeEnum) {
+    public ResponseEntity<List<DataEnvelope>> getDataByBlockType(@PathVariable("blockType") String blockType) {
 
-        log.info("Getting data envelopes of block type {}", blockTypeEnum);
-        return ResponseEntity.ok(server.getDataByBlockType(blockTypeEnum));
+        log.info("Getting data envelopes of block type {}", blockType);
+        return ResponseEntity.ok(server.getDataByBlockType(blockType));
                 // what if blocktypeenum is wrong?
     }
 

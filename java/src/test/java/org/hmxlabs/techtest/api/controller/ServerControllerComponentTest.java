@@ -1,6 +1,5 @@
 package org.hmxlabs.techtest.api.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.SneakyThrows;
 import org.hmxlabs.techtest.TestDataHelper;
 import org.hmxlabs.techtest.server.api.controller.ServerController;
@@ -8,9 +7,6 @@ import org.hmxlabs.techtest.server.api.model.DataEnvelope;
 import org.hmxlabs.techtest.server.component.Server;
 import org.hmxlabs.techtest.server.exception.HadoopClientException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hmxlabs.techtest.server.persistence.BlockTypeEnum;
-import org.hmxlabs.techtest.server.persistence.model.DataBodyEntity;
-import org.hmxlabs.techtest.server.persistence.model.DataHeaderEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,15 +20,11 @@ import org.springframework.web.util.UriTemplate;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hmxlabs.techtest.TestDataHelper.createTestDataBodyEntity;
-import static org.hmxlabs.techtest.TestDataHelper.createTestDataHeaderEntity;
+import static org.hmxlabs.techtest.TestDataHelper.TEST_BLOCKTYPEA_LOWERCASE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -52,8 +44,7 @@ public class ServerControllerComponentTest {
 	private Server serverMock;
 
 	private DataEnvelope testDataEnvelope;
-	private DataBodyEntity testDataBody;
-	private List<DataBodyEntity> testDataBodyList;
+	private List<DataEnvelope> testDataEnvelopeList;
 	private ObjectMapper objectMapper;
 	private MockMvc mockMvc;
 	private ServerController serverController;
@@ -69,10 +60,7 @@ public class ServerControllerComponentTest {
 
 		testDataEnvelope = TestDataHelper.createTestDataEnvelopeApiObject();
 
-		DataHeaderEntity testDataHeaderEntity = createTestDataHeaderEntity(Instant.now());
-		testDataBody = createTestDataBodyEntity(testDataHeaderEntity);
-
-		testDataBodyList = Collections.singletonList(testDataBody);
+		testDataEnvelopeList = Collections.singletonList(testDataEnvelope);
 	}
 
 	@Test
@@ -110,15 +98,14 @@ public class ServerControllerComponentTest {
 
 	@Test
 	public void testGetDataByBlockTypeCallWorksAsExpected() throws Exception {
+		String testDataEnvelopeListJson = objectMapper.writeValueAsString(testDataEnvelopeList);
 
-		String testDataBodyListJson = objectMapper.writeValueAsString(testDataBodyList);
-		// TODO change it so I send a data envelope not a databodyentity
-		when(serverMock.getDataByBlockType(any(BlockTypeEnum.class))).thenReturn(testDataBodyList);
+		when(serverMock.getDataByBlockType(any(String.class))).thenReturn(testDataEnvelopeList);
 
-		MvcResult mvcResult = mockMvc.perform(get(URI_GETDATA, BlockTypeEnum.BLOCKTYPEA)
+		MvcResult mvcResult = mockMvc.perform(get(URI_GETDATA, TEST_BLOCKTYPEA_LOWERCASE)
 						.accept(MediaType.APPLICATION_JSON_VALUE))
 				.andExpect(status().isOk())
-				.andExpect(content().json(testDataBodyListJson))
+				.andExpect(content().json(testDataEnvelopeListJson))
 				.andReturn();
 	}
 

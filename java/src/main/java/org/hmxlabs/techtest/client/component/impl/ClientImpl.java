@@ -1,16 +1,19 @@
 package org.hmxlabs.techtest.client.component.impl;
 
-import lombok.SneakyThrows;
 import org.hmxlabs.techtest.client.api.model.DataEnvelope;
 import org.hmxlabs.techtest.client.component.Client;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.client.RestClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriTemplate;
 import org.springframework.http.MediaType;
+
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,7 +26,7 @@ import java.util.List;
 public class ClientImpl implements Client {
 
     public static final String URI_PUSHDATA = "http://localhost:8090/dataserver/pushdata";
-    public static final UriTemplate URI_GETDATA = new UriTemplate("http://localhost:8090/dataserver/data/{blockType}");
+    public static final String URI_GETDATA = "http://localhost:8090/dataserver/data/{blockType}";
     public static final UriTemplate URI_PATCHDATA = new UriTemplate("http://localhost:8090/dataserver/update/{name}/{newBlockType}");
 
 
@@ -46,17 +49,17 @@ public class ClientImpl implements Client {
             rather than overcomplicate code and make it less maintainable if that functionality is not needed.
             TODO come back and try out a WebClient implementation?
          */
-
     }
 
     @Override
     public List<DataEnvelope> getData(String blockType) {
         log.info("Query for data with header block type {}", blockType);
         RestClient restClient = RestClient.create();
-        ResponseEntity<Void> response = restClient.get()
-                .uri(URI_PUSHDATA, blockType)
-                .retrieve().toEntity(Class);
-        return null;
+        return restClient.get()
+                .uri(URI_GETDATA, blockType)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .body(new ParameterizedTypeReference<List<DataEnvelope>>() {});
     }
 
     @Override

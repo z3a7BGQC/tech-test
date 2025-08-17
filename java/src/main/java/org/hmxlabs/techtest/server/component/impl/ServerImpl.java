@@ -1,7 +1,9 @@
 package org.hmxlabs.techtest.server.component.impl;
 
 import lombok.SneakyThrows;
+import org.hmxlabs.techtest.server.api.model.DataBody;
 import org.hmxlabs.techtest.server.api.model.DataEnvelope;
+import org.hmxlabs.techtest.server.api.model.DataHeader;
 import org.hmxlabs.techtest.server.persistence.BlockTypeEnum;
 import org.hmxlabs.techtest.server.persistence.model.DataBodyEntity;
 import org.hmxlabs.techtest.server.persistence.model.DataHeaderEntity;
@@ -13,6 +15,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -43,11 +46,49 @@ public class ServerImpl implements Server {
         return checksumValid;
     }
 
-    public List<DataBodyEntity> getDataByBlockType(BlockTypeEnum blockTypeEnum){
-        return dataBodyServiceImpl.getDataByBlockType(blockTypeEnum);
+    public List<DataEnvelope> getDataByBlockType(String blockType){
+        BlockTypeEnum blockTypeEnum = convertStringToEnum(blockType);
+        if (blockTypeEnum != null) {
+            List<DataBodyEntity> dataBodyEntityList = dataBodyServiceImpl.getDataByBlockType(blockTypeEnum);
+            if (dataBodyEntityList.isEmpty()) {
+                log.info("No data of block type {} found in data store", blockType);
+                return null;
+            } else {
+                log.info("Retrieved data of block type {} from data service", blockType);
+                if (packageDataBodyEntitiesIntoDataEnvelopes(dataBodyEntityList).isEmpty()) {
+                    return null;
+                } else return packageDataBodyEntitiesIntoDataEnvelopes(dataBodyEntityList);
+            }
+        }
+        return null;
+
+    }
+
+    private List<DataEnvelope> packageDataBodyEntitiesIntoDataEnvelopes(List<DataBodyEntity> dataBodyEntityList) {
+        log.info("Packaging data {} from data service", dataBodyEntityList);
+        ArrayList<DataEnvelope> dataEnvelopes = new ArrayList<>();
+        for ( DataBodyEntity i : dataBodyEntityList) {
+            DataHeader dataHeader = modelMapper.map(i.getDataHeaderEntity(), DataHeader.class);
+            DataBody dataBody = modelMapper.map(i, DataBody.class);
+            DataEnvelope dataEnvelope = new DataEnvelope(dataHeader, dataBody);
+            dataEnvelopes.add(dataEnvelope);
+        }
+        log.info("Packaged envelope data {} from data service", dataEnvelopes.getFirst().getDataHeader().getName());
+        return dataEnvelopes;
+    }
+
+    private BlockTypeEnum convertStringToEnum(String blockType) {
+        log.info("Attempting to convert string {} to BlockTypeEnum", blockType);
+        try {
+            return BlockTypeEnum.valueOf(blockType.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            log.info("Failed to convert string {} to BlockTypeEnum", blockType);
+            return null;
+        }
     }
 
     private boolean isChecksumValid(DataEnvelope dataEnvelope) throws NoSuchAlgorithmException {
+        log.info("Validating checksum for data with attribute name {}", dataEnvelope.getDataHeader().getName());
         if (dataEnvelope.getDataHeader().getMd5Checksum() == null) {
             return false;
         } else {

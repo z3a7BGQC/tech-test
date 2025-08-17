@@ -8,7 +8,6 @@ import org.hmxlabs.techtest.server.persistence.model.DataBodyEntity;
 import org.hmxlabs.techtest.server.persistence.model.DataHeaderEntity;
 
 import java.time.Instant;
-import java.util.List;
 
 public class TestDataHelper {
 
@@ -17,6 +16,7 @@ public class TestDataHelper {
     public static final String DUMMY_DATA = "AKCp5fU4WNWKBVvhXsbNhqk33tawri9iJUkA5o4A6YqpwvAoYjajVw8xdEw6r9796h1wEp29D";
     public static final String VALID_MD5_CHECKSUM = "cecfd3953783df706878aaec2c22aa70";
     public static final String INVALID_MD5_CHECKSUM = "notvalid3783df706878aaec2c22aa70";
+    public static final String TEST_BLOCKTYPEA_LOWERCASE = "blocktypea";
 
     public static DataHeaderEntity createTestDataHeaderEntity(Instant expectedTimestamp) {
         DataHeaderEntity dataHeaderEntity = new DataHeaderEntity();
