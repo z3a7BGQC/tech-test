@@ -1,12 +1,10 @@
 package org.hmxlabs.techtest.server.api.model;
 
+import lombok.*;
 import org.hmxlabs.techtest.server.persistence.BlockTypeEnum;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 
 @JsonSerialize(as = DataHeader.class)
@@ -14,11 +12,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 public class DataHeader {
 
     @NotBlank
     private String name;
 
     private BlockTypeEnum blockType;
+
+    private String md5Checksum;
 
 }

@@ -1,5 +1,6 @@
 package org.hmxlabs.techtest.service;
 
+import org.hmxlabs.techtest.server.persistence.BlockTypeEnum;
 import org.hmxlabs.techtest.server.persistence.model.DataBodyEntity;
 import org.hmxlabs.techtest.server.persistence.model.DataHeaderEntity;
 import org.hmxlabs.techtest.server.persistence.repository.DataStoreRepository;
@@ -44,6 +45,14 @@ public class DataBodyServiceTests {
 
         verify(dataStoreRepositoryMock, times(1))
                 .save(eq(expectedDataBodyEntity));
+    }
+
+    @Test
+    public void shouldGetDataBodyEntitiesByBlockType(){
+        dataBodyService.getDataByBlockType(BlockTypeEnum.BLOCKTYPEA);
+
+        verify(dataStoreRepositoryMock, times(1))
+                .findDataBodyEntityByDataHeaderEntityBlocktype(eq(BlockTypeEnum.BLOCKTYPEA));
     }
 
 }

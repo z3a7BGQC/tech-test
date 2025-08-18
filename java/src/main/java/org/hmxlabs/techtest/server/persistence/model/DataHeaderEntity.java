@@ -2,6 +2,7 @@ package org.hmxlabs.techtest.server.persistence.model;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
 import org.hmxlabs.techtest.server.persistence.BlockTypeEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,6 +29,7 @@ import java.time.Instant;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode
 public class DataHeaderEntity {
 
     @Id
@@ -43,9 +45,11 @@ public class DataHeaderEntity {
     @Enumerated(EnumType.STRING)
     private BlockTypeEnum blocktype;
 
+    @Column(name = "MD5_CHECKSUM")
+    private String md5Checksum;
 
     @Column(name = "CREATED_TIMESTAMP")
-    private Instant createdTimestamp;
+    @EqualsAndHashCode.Exclude private Instant createdTimestamp;
 
     @PrePersist
     public void setTimestamps() {

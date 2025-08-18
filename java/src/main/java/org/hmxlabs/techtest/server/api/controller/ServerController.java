@@ -9,12 +9,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-
+import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -32,7 +30,28 @@ public class ServerController {
         boolean checksumPass = server.saveDataEnvelope(dataEnvelope);
 
         log.info("Data envelope persisted. Attribute name: {}", dataEnvelope.getDataHeader().getName());
-        return ResponseEntity.ok(checksumPass);
+        return ResponseEntity.ok(checksumPass); // change to CREATED status if successful checksum? FORBIDDEN if invalid? & send back Want-Content-Digest Header
+    }
+
+    @GetMapping(value = "/data/{blockType}")
+    public ResponseEntity<List<DataEnvelope>> getDataByBlockType(@PathVariable("blockType") String blockType) {
+
+        log.info("Received get request for data envelopes of block type {}", blockType);
+        return ResponseEntity.ok(server.getDataByBlockType(blockType));
     }
 
 }
+
+/* Was looking up how to transport the checksum - found the Content-MD5 header, which is now deprecated.
+    Alternatives are - the Content-Digest header or making a custom content header for your service.
+    Chose Content-Digest - in usage, meets the needs.
+
+    Exercise 2 notes:
+    Unsure where to do the checksum validation - passing it to ServerImpl means changing the interface, which I am suspect of
+    Could keep it in Controller layer? -> Yes, makes sense to keep validation here so invalid data doesn't go further.
+    It also separates concerns so that ServerImpl has the core focus of saving the data.
+    This means that we will calculate the checksum twice - once in controller layer to verify and 2nd in sever layer to save and persist
+
+    Should I change the ResponseEntity - it's currently a boolean.
+    Possibilities: alternative statuses of 200 CREATED and 403 FORBIDDEN based on the checksum?
+ */

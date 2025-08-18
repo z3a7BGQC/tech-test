@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.EqualsAndHashCode;
 
 import java.time.Instant;
 
@@ -24,6 +25,7 @@ import java.time.Instant;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode
 public class DataBodyEntity {
 
     @Id
@@ -40,7 +42,7 @@ public class DataBodyEntity {
     private String dataBody;
 
     @Column(name = "CREATED_TIMESTAMP")
-    private Instant createdTimestamp;
+    @EqualsAndHashCode.Exclude private Instant createdTimestamp;
 
     @PrePersist
     public void setTimestamps() {
