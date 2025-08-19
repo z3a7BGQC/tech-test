@@ -9,5 +9,5 @@ import java.util.List;
 public interface Client {
     void pushData(DataEnvelope dataEnvelope) throws JsonProcessingException;
     List<DataEnvelope> getData(String blockType);
-    boolean updateData(String blockName, String newBlockType) throws UnsupportedEncodingException;
+    boolean updateData(String blockName, String newBlockType) throws UnsupportedEncodingException, JsonProcessingException;
 }
