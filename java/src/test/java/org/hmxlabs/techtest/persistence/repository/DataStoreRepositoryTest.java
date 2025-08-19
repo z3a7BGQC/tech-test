@@ -17,11 +17,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
-import static org.hmxlabs.techtest.TestDataHelper.createTestDataBodyEntity;
-import static org.hmxlabs.techtest.TestDataHelper.createTestDataHeaderEntity;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.hmxlabs.techtest.TestDataHelper.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @ExtendWith(SpringExtension.class)
@@ -55,6 +54,14 @@ public class DataStoreRepositoryTest {
 
         assertNotNull(foundDataBodyEntities);
         assertEquals(testDataBodyList, foundDataBodyEntities);
+    }
+
+    @Test
+    public void shouldFindDataBodyEntityByName() {
+        Optional<DataBodyEntity> foundDataBodyEntity = dataStoreRepository.findDataBodyEntityByDataHeaderEntityName(TEST_NAME);
+
+        assertNotNull(foundDataBodyEntity);
+        assertEquals(testDataBody,foundDataBodyEntity.get());
     }
 
 /**
