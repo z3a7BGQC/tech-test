@@ -63,6 +63,10 @@ public class ServerImpl implements Server {
         return dataEnvelopes.isEmpty() ? Collections.emptyList() : dataEnvelopes;
     }
 
+    public boolean updateDataBlockType(String blockName, String newBlockType) {
+        return true;
+    }
+
     private List<DataEnvelope> packageDataBodyEntitiesIntoDataEnvelopes(List<DataBodyEntity> dataBodyEntityList) {
         ArrayList<DataEnvelope> dataEnvelopes = new ArrayList<>();
         for ( DataBodyEntity i : dataBodyEntityList) {

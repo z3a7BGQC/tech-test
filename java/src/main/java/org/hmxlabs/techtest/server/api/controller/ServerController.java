@@ -40,6 +40,9 @@ public class ServerController {
         return ResponseEntity.ok(server.getDataByBlockType(blockType));
     }
 
+    // Going to use PATCH method - fits use case best - BUT would consider the client-side use cases
+    // especially if interfacing with particular systems, support for patch is not universal.
+
 }
 
 /* Was looking up how to transport the checksum - found the Content-MD5 header, which is now deprecated.

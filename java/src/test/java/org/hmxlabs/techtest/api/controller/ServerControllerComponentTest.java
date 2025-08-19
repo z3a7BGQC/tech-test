@@ -27,8 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hmxlabs.techtest.TestDataHelper.TEST_BLOCKTYPEA_LOWERCASE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
@@ -38,7 +37,7 @@ public class ServerControllerComponentTest {
 
 	public static final String URI_PUSHDATA = "http://localhost:8090/dataserver/pushdata";
 	public static final String URI_GETDATA = "http://localhost:8090/dataserver/data/{blockType}";
-	public static final UriTemplate URI_PATCHDATA = new UriTemplate("http://localhost:8090/dataserver/update/{name}/{newBlockType}");
+	public static final String URI_PATCHDATA = "http://localhost:8090/dataserver/update/{name}/{newBlockType}";
 
 	@Mock
 	private Server serverMock;
@@ -108,6 +107,28 @@ public class ServerControllerComponentTest {
 				.andExpect(content().json(testDataEnvelopeListJson))
 				.andReturn();
 	}
+
+	@Test
+	public void testUpdateDataBlockType() throws Exception {
+//		String testDataEnvelopeListJson = objectMapper.writeValueAsString(testDataEnvelopeList);
+
+		when(serverMock.updateDataBlockType(any(String.class), any(String.class))).thenReturn(true);
+
+		MvcResult mvcResult = mockMvc.perform(patch(URI_PATCHDATA, "Test", "blocktypeb")
+						.content(MediaType.APPLICATION_JSON_VALUE)
+						.accept(MediaType.APPLICATION_JSON_VALUE))
+				.andExpect(status().isOk())
+				.andReturn();
+
+		boolean blockTypePatched = Boolean.parseBoolean(mvcResult.getResponse().getContentAsString());
+		assertThat(blockTypePatched).isFalse();
+	}
+
+//	{
+//		"op":"replace",
+//			"path":"/blockType",
+//			"value":"blocktypeb"
+//	}
 
 	/** Test Scenarios
 	 *
