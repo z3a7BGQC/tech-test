@@ -121,7 +121,7 @@ public class ServerControllerComponentTest {
 				.andReturn();
 
 		boolean blockTypePatched = Boolean.parseBoolean(mvcResult.getResponse().getContentAsString());
-		assertThat(blockTypePatched).isFalse();
+		assertThat(blockTypePatched).isTrue();
 	}
 
 //	{

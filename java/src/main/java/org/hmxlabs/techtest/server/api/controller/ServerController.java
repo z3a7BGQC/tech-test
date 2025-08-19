@@ -2,6 +2,8 @@ package org.hmxlabs.techtest.server.api.controller;
 
 import org.hmxlabs.techtest.server.api.model.DataEnvelope;
 import org.hmxlabs.techtest.server.component.Server;
+import org.hmxlabs.techtest.server.persistence.BlockTypeEnum;
+import org.hmxlabs.techtest.server.validation.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +41,17 @@ public class ServerController {
         log.info("Received get request for data envelopes of block type {}", blockType);
         return ResponseEntity.ok(server.getDataByBlockType(blockType));
     }
+
+    @PatchMapping(value = "/update/{blockName}/{newBlockType}")
+    public ResponseEntity<Boolean> updateDataBlockType(
+            @PathVariable("blockName") String blockName,
+            @PathVariable("newBlockType")
+            @EnumValidator(enumClazz = BlockTypeEnum.class, message = "Invalid BlockType Enum") String newBlockType) {
+
+        return null;
+    }
+
+
 
     // Going to use PATCH method - fits use case best - BUT would consider the client-side use cases
     // especially if interfacing with particular systems, support for patch is not universal.
