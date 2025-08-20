@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -65,6 +66,16 @@ public class ServerImpl implements Server {
     }
 
     public boolean updateDataBlockType(String blockName, DataPatchBlockTypeDto newBlockTypeDto) {
+        log.info("Attempting to retrieve data of block name {} from data store", blockName);
+        Optional<DataBodyEntity> existingDataBlock = dataBodyServiceImpl.getDataByBlockName(blockName);
+        if (existingDataBlock.isEmpty()) {
+            log.info("No data of block name {} found in data store", blockName);
+            return false;
+        }
+        DataBodyEntity dataBodyEntityToUpdate = existingDataBlock.get();
+        dataBodyEntityToUpdate.getDataHeaderEntity().setBlocktype(convertStringToEnum(newBlockTypeDto.getBlockType()));
+        saveData(dataBodyEntityToUpdate);
+        log.info("Succesfully updated data block {} to block type {}", blockName, newBlockTypeDto.getBlockType());
         return true;
     }
 

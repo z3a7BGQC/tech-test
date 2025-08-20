@@ -45,7 +45,7 @@ public class ServerController {
     public ResponseEntity<Boolean> updateDataBlockType(
             @PathVariable("blockName") String blockName,
             @RequestBody @Valid DataPatchBlockTypeDto dto) {
-
+            log.info("Received request to update data block {} to blocktype {}",blockName, dto.getBlockType() );
         return ResponseEntity.ok(server.updateDataBlockType(blockName, dto));
     }
 

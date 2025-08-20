@@ -44,7 +44,7 @@ public class TechTestApplication {
 		updateData();
 	}
 
-	private void updateData() throws UnsupportedEncodingException {
+	private void updateData() throws UnsupportedEncodingException, JsonProcessingException {
 		boolean success = client.updateData(HEADER_NAME, BlockTypeEnum.BLOCKTYPEB.name());
 	}
 

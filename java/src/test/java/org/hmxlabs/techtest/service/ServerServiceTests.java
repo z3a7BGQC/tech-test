@@ -1,6 +1,8 @@
 package org.hmxlabs.techtest.service;
 
+import org.hmxlabs.techtest.TestDataHelper;
 import org.hmxlabs.techtest.server.api.model.DataEnvelope;
+import org.hmxlabs.techtest.server.api.model.DataPatchBlockTypeDto;
 import org.hmxlabs.techtest.server.component.Server;
 import org.hmxlabs.techtest.server.component.impl.ServerImpl;
 import org.hmxlabs.techtest.server.mapper.ServerMapperConfiguration;
@@ -18,8 +20,10 @@ import org.modelmapper.ModelMapper;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hmxlabs.techtest.TestDataHelper.*;
 import static org.mockito.Mockito.*;
@@ -41,6 +45,9 @@ public class ServerServiceTests {
     private DataEnvelope testDataEnvelopeNullChecksum;
     private List<DataEnvelope> testDataEnvelopeList;
     private List<DataBodyEntity> testDataBodyEntityList;
+    private DataBodyEntity testDataBody;
+    private DataPatchBlockTypeDto testPatchValidDto;
+    private DataPatchBlockTypeDto testPatchInvalidDto;
     private final String TEST_BLOCKTYPEB_LOWERCASE = "blocktypeb";
     private final String TEST_BLOCKTYPEC_LOWERCASE = "blocktypec";
 
@@ -63,8 +70,14 @@ public class ServerServiceTests {
         expectedDataBodyEntity3 = modelMapper.map(testDataEnvelopeNullChecksum.getDataBody(), DataBodyEntity.class);
         expectedDataBodyEntity3.setDataHeaderEntity(modelMapper.map(testDataEnvelopeNullChecksum.getDataHeader(), DataHeaderEntity.class));
 
+        DataHeaderEntity testDataHeaderEntity = createTestDataHeaderEntity(Instant.now());
+        testDataBody = createTestDataBodyEntity(testDataHeaderEntity);
+
         testDataEnvelopeList = Collections.singletonList(testDataEnvelope);
         testDataBodyEntityList = Collections.singletonList(expectedDataBodyEntity);
+
+        testPatchValidDto = TestDataHelper.createTestDataPatchBlockyTypeDto("blocktypeb");
+        testPatchInvalidDto = TestDataHelper.createTestDataPatchBlockyTypeDto("blocktypec");
         server = new ServerImpl(dataBodyServiceImplMock, modelMapper);
     }
 
@@ -112,6 +125,22 @@ public class ServerServiceTests {
 
         assertThat(actualDataEnvelopes).isEmpty();
         verify(dataBodyServiceImplMock, never()).getDataByBlockType(BlockTypeEnum.BLOCKTYPEB);
+    }
+
+    @Test void shouldSuccessfullyUpdateBlockType() {
+        when(dataBodyServiceImplMock.getDataByBlockName(TEST_NAME)).thenReturn(Optional.ofNullable(testDataBody));
+        boolean success = server.updateDataBlockType(TEST_NAME, testPatchValidDto);
+
+        assertThat(success).isTrue();
+        verify(dataBodyServiceImplMock, times(1)).getDataByBlockName(TEST_NAME);
+    }
+
+    @Test void shouldNotSuccessfullyUpdateBlockTypeIfNoMatchingBlock() {
+        when(dataBodyServiceImplMock.getDataByBlockName(TEST_NAME)).thenReturn(Optional.empty());
+        boolean failure = server.updateDataBlockType(TEST_NAME, testPatchValidDto);
+
+        assertThat(failure).isFalse();
+        verify(dataBodyServiceImplMock, times(1)).getDataByBlockName(TEST_NAME);
     }
 
 

@@ -1,15 +1,20 @@
 package org.hmxlabs.techtest.client.component.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hmxlabs.techtest.client.api.model.DataEnvelope;
+import org.hmxlabs.techtest.client.api.model.DataPatchBlockTypeDto;
 import org.hmxlabs.techtest.client.component.Client;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.client.RestClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.UriTemplate;
 import org.springframework.http.MediaType;
+
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
@@ -21,9 +26,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ClientImpl implements Client {
 
+    private ObjectMapper objectMapper;
+
     public static final String URI_PUSHDATA = "http://localhost:8090/dataserver/pushdata";
     public static final String URI_GETDATA = "http://localhost:8090/dataserver/data/{blockType}";
-    public static final UriTemplate URI_PATCHDATA = new UriTemplate("http://localhost:8090/dataserver/update/{name}/{newBlockType}");
+    public static final String URI_PATCHDATA = "http://localhost:8090/dataserver/update/{name}/blockType";
 
 
     @Override
@@ -59,9 +66,22 @@ public class ClientImpl implements Client {
     }
 
     @Override
-    public boolean updateData(String blockName, String newBlockType) {
+    public boolean updateData(String blockName, String newBlockType) throws JsonProcessingException {
         log.info("Updating blocktype to {} for block with name {}", newBlockType, blockName);
-        return true;
+        DataPatchBlockTypeDto patchDto = new DataPatchBlockTypeDto(newBlockType);
+        objectMapper = Jackson2ObjectMapperBuilder
+                .json()
+                .build();
+
+        String patchDtoJson = objectMapper.writeValueAsString(patchDto);
+        RestClient restClient = RestClient.create();
+        return restClient.patch()
+                .uri(URI_PATCHDATA, blockName)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(patchDtoJson)
+                .retrieve()
+                .body(new ParameterizedTypeReference<Boolean>() {});
+
     }
 
 }
