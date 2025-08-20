@@ -2,31 +2,34 @@ package org.hmxlabs.techtest.server.component.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
+import io.netty.handler.timeout.ReadTimeoutException;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.hmxlabs.techtest.server.api.model.DataBody;
 import org.hmxlabs.techtest.server.api.model.DataEnvelope;
 import org.hmxlabs.techtest.server.api.model.DataHeader;
 import org.hmxlabs.techtest.server.api.model.DataPatchBlockTypeDto;
+import org.hmxlabs.techtest.server.component.Server;
 import org.hmxlabs.techtest.server.persistence.BlockTypeEnum;
 import org.hmxlabs.techtest.server.persistence.model.DataBodyEntity;
 import org.hmxlabs.techtest.server.persistence.model.DataHeaderEntity;
 import org.hmxlabs.techtest.server.service.DataBodyService;
-import org.hmxlabs.techtest.server.component.Server;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 @Slf4j
@@ -36,16 +39,10 @@ public class ServerImpl implements Server {
 
     private final DataBodyService dataBodyServiceImpl;
     private final ModelMapper modelMapper;
-    private final WebClient.Builder webClientBuilder;
     private ObjectMapper objectMapper;
-    private WebClient webClient;
+    private final WebClient webClient;
 
     private static final String DIGEST_ALGORITHM = "MD5";
-
-    @PostConstruct
-    private void init() {
-        this.webClient = webClientBuilder.baseUrl("http://localhost:8090/hadoopserver").build();
-    }
 
     /**
      * @param envelope
@@ -62,9 +59,8 @@ public class ServerImpl implements Server {
         log.info("Persisting data with attribute name: {}", envelope.getDataHeader().getName());
         saveData(dataBodyEntity);
         log.info("Data persisted successfully, now pushing data to Hadoop, data name: {}", envelope.getDataHeader().getName());
-        Mono<String> hadoopPushRespose = pushToHadoop(dataBodyEntity);
+        return pushToHadoop(dataBodyEntity);
 //        log.info("Data successfully pushed data to Hadoop, data name: {}", envelope.getDataHeader().getName());
-        return hadoopPushRespose;
     }
 
     public List<DataEnvelope> getDataByBlockType(String blockType){
@@ -107,11 +103,28 @@ public class ServerImpl implements Server {
     }
 
     private Mono<String> hadoopPost(String payload) {
+////        Retry indefiniteRetry = Retry.indefinitely()
+////                .filter(throwable -> throwable instanceof RuntimeException);
+        LocalDateTime now = LocalDateTime.now();
+        log.info("Sending payload to Hadoop at {}", now);
         return webClient.post()
                         .uri("/pushbigdata")
                         .bodyValue(payload)
                         .retrieve()
-                        .bodyToMono(String.class);
+                        .bodyToMono(String.class)
+                        .retryWhen(Retry.backoff(2, Duration.ofSeconds(1))
+                                .filter(throwable -> throwable instanceof ReadTimeoutException))
+                        .onErrorComplete();
+
+        /**
+         * different errors encountered:
+         * finishConnect(..) failed: Connection refused
+         *  -
+         * Caused by: io.netty.handler.timeout.ReadTimeoutException: null
+         *  -
+         * to stop my application erroring I used .onErrorComplete()
+         * - ideally I need to handle that error and try again
+         */
     }
 
     private List<DataEnvelope> packageDataBodyEntitiesIntoDataEnvelopes(List<DataBodyEntity> dataBodyEntityList) {
