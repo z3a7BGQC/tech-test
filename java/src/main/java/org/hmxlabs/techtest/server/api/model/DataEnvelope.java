@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hmxlabs.techtest.server.persistence.BlockTypeEnum;
+import org.hmxlabs.techtest.server.validation.EnumValidator;
 
 
 @JsonSerialize(as = DataEnvelope.class)

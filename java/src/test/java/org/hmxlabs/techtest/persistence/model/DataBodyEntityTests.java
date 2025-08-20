@@ -12,6 +12,7 @@ import java.time.Instant;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hmxlabs.techtest.TestDataHelper.TEST_NAME;
 import static org.hmxlabs.techtest.TestDataHelper.createTestDataBodyEntity;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,7 +48,7 @@ public class DataBodyEntityTests {
         dataHeaderEntity2.setCreatedTimestamp(Instant.now().plusSeconds(100L));
         DataBodyEntity dataBodyEntity2 = createTestDataBodyEntity(dataHeaderEntity2);
 
-        assertTrue(dataBodyEntity1.equals(dataBodyEntity2));
+        assertEquals(dataBodyEntity1,dataBodyEntity2);
 
         /*
         - Why would we want to test equality?

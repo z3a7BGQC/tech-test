@@ -7,11 +7,13 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DataStoreRepository extends JpaRepository<DataBodyEntity, Long> {
 
     @Transactional//??
-    public List<DataBodyEntity> findDataBodyEntityByDataHeaderEntityBlocktype(BlockTypeEnum blockTypeEnum);
+    List<DataBodyEntity> findDataBodyEntityByDataHeaderEntityBlocktype(BlockTypeEnum blockTypeEnum);
 
+    Optional<DataBodyEntity> findDataBodyEntityByDataHeaderEntityName(String name);
 }

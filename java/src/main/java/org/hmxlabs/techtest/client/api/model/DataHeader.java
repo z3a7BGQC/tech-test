@@ -20,6 +20,7 @@ public class DataHeader {
     @NotNull
     private final BlockTypeEnum blockType;
 
+    @NotNull
     private final String md5Checksum;
 
 }

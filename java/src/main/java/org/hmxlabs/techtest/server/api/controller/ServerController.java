@@ -1,6 +1,7 @@
 package org.hmxlabs.techtest.server.api.controller;
 
 import org.hmxlabs.techtest.server.api.model.DataEnvelope;
+import org.hmxlabs.techtest.server.api.model.DataPatchBlockTypeDto;
 import org.hmxlabs.techtest.server.component.Server;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,23 @@ public class ServerController {
         log.info("Received get request for data envelopes of block type {}", blockType);
         return ResponseEntity.ok(server.getDataByBlockType(blockType));
     }
+
+    @PatchMapping(value = "/update/{blockName}/blockType", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Boolean> updateDataBlockType(
+            @PathVariable("blockName") String blockName,
+            @RequestBody @Valid DataPatchBlockTypeDto dto) {
+
+        return ResponseEntity.ok(server.updateDataBlockType(blockName, dto));
+    }
+
+    /**
+     * used curl to debug patch,test is getting 415, but curl is getting 200, true
+     */
+
+
+
+    // Going to use PATCH method - fits use case best - BUT would consider the client-side use cases
+    // especially if interfacing with particular systems, support for patch is not universal.
 
 }
 

@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import org.hmxlabs.techtest.TestDataHelper;
 import org.hmxlabs.techtest.server.api.controller.ServerController;
 import org.hmxlabs.techtest.server.api.model.DataEnvelope;
+import org.hmxlabs.techtest.server.api.model.DataPatchBlockTypeDto;
 import org.hmxlabs.techtest.server.component.Server;
 import org.hmxlabs.techtest.server.exception.HadoopClientException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,8 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hmxlabs.techtest.TestDataHelper.TEST_BLOCKTYPEA_LOWERCASE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
@@ -38,7 +38,7 @@ public class ServerControllerComponentTest {
 
 	public static final String URI_PUSHDATA = "http://localhost:8090/dataserver/pushdata";
 	public static final String URI_GETDATA = "http://localhost:8090/dataserver/data/{blockType}";
-	public static final UriTemplate URI_PATCHDATA = new UriTemplate("http://localhost:8090/dataserver/update/{name}/{newBlockType}");
+	public static final String URI_PATCHDATA = "http://localhost:8090/dataserver/update/{blockName}/blockType";
 
 	@Mock
 	private Server serverMock;
@@ -108,6 +108,47 @@ public class ServerControllerComponentTest {
 				.andExpect(content().json(testDataEnvelopeListJson))
 				.andReturn();
 	}
+
+	@Test
+	public void testUpdateDataBlockTypeCallWorksAsExpected() throws Exception {
+		DataPatchBlockTypeDto testPatchValidDto = TestDataHelper.createTestDataPatchBlockyTypeDto("BLOCKTYPEB");
+		String testPatchInvalidDtoJson = objectMapper.writeValueAsString(testPatchValidDto);
+
+		when(serverMock.updateDataBlockType(any(String.class), any(DataPatchBlockTypeDto.class))).thenReturn(true);
+
+		MvcResult mvcResult = mockMvc.perform(patch(URI_PATCHDATA, "Test")
+						.contentType(MediaType.APPLICATION_JSON_VALUE)
+						.content(testPatchInvalidDtoJson)
+						.accept(MediaType.APPLICATION_JSON_VALUE))
+				.andExpect(status().isOk())
+				.andReturn();
+
+		boolean blockTypePatched = Boolean.parseBoolean(mvcResult.getResponse().getContentAsString());
+
+		assertThat(blockTypePatched).isTrue();
+	}
+
+	@Test
+	public void testUpdateDataBlockTypeFailsInvalidEnumString() throws Exception {
+		DataPatchBlockTypeDto testPatchInvalidDto = TestDataHelper.createTestDataPatchBlockyTypeDto("blocktypec");
+		String testPatchInvalidDtoJson = objectMapper.writeValueAsString(testPatchInvalidDto);
+//
+		MvcResult mvcResult = mockMvc.perform(patch(URI_PATCHDATA, "Test")
+						.contentType(MediaType.APPLICATION_JSON_VALUE)
+						.content(testPatchInvalidDtoJson)
+						.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest())
+				.andReturn();
+
+		boolean blockTypePatched = Boolean.parseBoolean(mvcResult.getResponse().getContentAsString());
+		assertThat(blockTypePatched).isFalse();
+	}
+
+//	{
+//		"op":"replace",
+//			"path":"/blockType",
+//			"value":"blocktypeb"
+//	}
 
 	/** Test Scenarios
 	 *
