@@ -1,5 +1,8 @@
 package org.hmxlabs.techtest.server.component.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
 import org.hmxlabs.techtest.server.api.model.DataBody;
 import org.hmxlabs.techtest.server.api.model.DataEnvelope;
@@ -13,7 +16,10 @@ import org.hmxlabs.techtest.server.component.Server;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -30,7 +36,16 @@ public class ServerImpl implements Server {
 
     private final DataBodyService dataBodyServiceImpl;
     private final ModelMapper modelMapper;
-    public static final String DIGEST_ALGORITHM = "MD5";
+    private final WebClient.Builder webClientBuilder;
+    private ObjectMapper objectMapper;
+    private WebClient webClient;
+
+    private static final String DIGEST_ALGORITHM = "MD5";
+
+    @PostConstruct
+    private void init() {
+        this.webClient = webClientBuilder.baseUrl("http://localhost:8090/hadoopserver").build();
+    }
 
     /**
      * @param envelope
@@ -38,14 +53,18 @@ public class ServerImpl implements Server {
      */
     @Override
     @SneakyThrows
-    public boolean saveDataEnvelope(DataEnvelope envelope) {
+    public Mono<String> saveDataEnvelope(DataEnvelope envelope) {
         boolean checksumValid = isChecksumValid(envelope);
-
-        if (checksumValid) {
-            persist(envelope);
-            log.info("Data persisted successfully, data name: {}", envelope.getDataHeader().getName());
+        if (!checksumValid) { // TODO add checksum validation to @PostMapping validation
+            return null;
         }
-        return checksumValid;
+        DataBodyEntity dataBodyEntity = unpackDataEvelopeAndMaptoDataBodyEntity(envelope);
+        log.info("Persisting data with attribute name: {}", envelope.getDataHeader().getName());
+        saveData(dataBodyEntity);
+        log.info("Data persisted successfully, now pushing data to Hadoop, data name: {}", envelope.getDataHeader().getName());
+        Mono<String> hadoopPushRespose = pushToHadoop(dataBodyEntity);
+//        log.info("Data successfully pushed data to Hadoop, data name: {}", envelope.getDataHeader().getName());
+        return hadoopPushRespose;
     }
 
     public List<DataEnvelope> getDataByBlockType(String blockType){
@@ -75,8 +94,24 @@ public class ServerImpl implements Server {
         DataBodyEntity dataBodyEntityToUpdate = existingDataBlock.get();
         dataBodyEntityToUpdate.getDataHeaderEntity().setBlocktype(convertStringToEnum(newBlockTypeDto.getBlockType()));
         saveData(dataBodyEntityToUpdate);
-        log.info("Succesfully updated data block {} to block type {}", blockName, newBlockTypeDto.getBlockType());
+        log.info("Successfully updated data block {} to block type {}", blockName, newBlockTypeDto.getBlockType());
         return true;
+    }
+
+    private Mono<String> pushToHadoop(DataBodyEntity dataBodyEntity) throws JsonProcessingException {
+        objectMapper = Jackson2ObjectMapperBuilder
+                .json()
+                .build();
+        String payload = objectMapper.writeValueAsString(dataBodyEntity);
+        return hadoopPost(payload);
+    }
+
+    private Mono<String> hadoopPost(String payload) {
+        return webClient.post()
+                        .uri("/pushbigdata")
+                        .bodyValue(payload)
+                        .retrieve()
+                        .bodyToMono(String.class);
     }
 
     private List<DataEnvelope> packageDataBodyEntitiesIntoDataEnvelopes(List<DataBodyEntity> dataBodyEntityList) {
@@ -89,6 +124,15 @@ public class ServerImpl implements Server {
         }
         log.info("Successfully packaged envelope data {} from data store", dataEnvelopes.getFirst().getDataHeader().getName());
         return dataEnvelopes;
+    }
+
+    private DataBodyEntity unpackDataEvelopeAndMaptoDataBodyEntity(DataEnvelope envelope) {
+        DataHeaderEntity dataHeaderEntity = modelMapper.map(envelope.getDataHeader(), DataHeaderEntity.class);
+
+        DataBodyEntity dataBodyEntity = modelMapper.map(envelope.getDataBody(), DataBodyEntity.class);
+        dataBodyEntity.setDataHeaderEntity(dataHeaderEntity);
+
+        return dataBodyEntity;
     }
 
     private BlockTypeEnum convertStringToEnum(String blockType) {
@@ -111,16 +155,6 @@ public class ServerImpl implements Server {
             String arrivedDataBodyChecksum = new BigInteger(1, hash).toString(16);
             return dataEnvelope.getDataHeader().getMd5Checksum().equals(arrivedDataBodyChecksum);
         }
-    }
-
-    private void persist(DataEnvelope envelope) {
-        log.info("Persisting data with attribute name: {}", envelope.getDataHeader().getName());
-        DataHeaderEntity dataHeaderEntity = modelMapper.map(envelope.getDataHeader(), DataHeaderEntity.class);
-
-        DataBodyEntity dataBodyEntity = modelMapper.map(envelope.getDataBody(), DataBodyEntity.class);
-        dataBodyEntity.setDataHeaderEntity(dataHeaderEntity);
-
-        saveData(dataBodyEntity);
     }
 
     private void saveData(DataBodyEntity dataBodyEntity) {

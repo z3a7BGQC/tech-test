@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.web.reactive.function.client.WebClient;
 
 
 import java.io.IOException;
@@ -36,6 +37,8 @@ public class ServerServiceTests {
     private DataBodyService dataBodyServiceImplMock;
 
     private ModelMapper modelMapper;
+
+    private WebClient webClient;
 
     private DataBodyEntity expectedDataBodyEntity;
     private DataBodyEntity expectedDataBodyEntity2;
@@ -78,7 +81,7 @@ public class ServerServiceTests {
 
         testPatchValidDto = TestDataHelper.createTestDataPatchBlockyTypeDto("blocktypeb");
         testPatchInvalidDto = TestDataHelper.createTestDataPatchBlockyTypeDto("blocktypec");
-        server = new ServerImpl(dataBodyServiceImplMock, modelMapper);
+        server = new ServerImpl(dataBodyServiceImplMock, modelMapper, webClient );
     }
 
     @Test

@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
+
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -25,13 +27,12 @@ public class ServerController {
     private final Server server;
 
     @PostMapping(value = "/pushdata", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> pushData(@Valid @RequestBody DataEnvelope dataEnvelope) throws IOException, NoSuchAlgorithmException {
+    public ResponseEntity<Mono<String>> pushData(@Valid @RequestBody DataEnvelope dataEnvelope) throws IOException, NoSuchAlgorithmException {
 
         log.info("Data envelope received: {}", dataEnvelope.getDataHeader().getName());
-        boolean checksumPass = server.saveDataEnvelope(dataEnvelope);
+        Mono<String> hadoopResponse = server.saveDataEnvelope(dataEnvelope);
 
-        log.info("Data envelope persisted. Attribute name: {}", dataEnvelope.getDataHeader().getName());
-        return ResponseEntity.ok(checksumPass); // change to CREATED status if successful checksum? FORBIDDEN if invalid? & send back Want-Content-Digest Header
+        return ResponseEntity.ok(hadoopResponse); // change to CREATED status if successful checksum? FORBIDDEN if invalid? & send back Want-Content-Digest Header
     }
 
     @GetMapping(value = "/data/{blockType}")
