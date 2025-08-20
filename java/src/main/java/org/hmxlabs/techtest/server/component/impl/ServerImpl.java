@@ -124,6 +124,11 @@ public class ServerImpl implements Server {
          *  -
          * to stop my application erroring I used .onErrorComplete()
          * - ideally I need to handle that error and try again
+         *
+         * I actually seemed to be getting better responses earlier (when my POST was simpler?)
+         * I tried using a curl and that gave me the gateway error - my app seems to be failing immediately - sort out timeouts??
+         * TODO look at timeouts, see if rest of app can continue while we wait for the data to process?
+         * the only issue with that is db calls - so data could become out of sync
          */
     }
 
