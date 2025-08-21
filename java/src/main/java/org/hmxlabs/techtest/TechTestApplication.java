@@ -39,9 +39,9 @@ public class TechTestApplication {
 	public void initiatePushDataFlow() throws JsonProcessingException, UnsupportedEncodingException {
 		pushData();
 
-//		queryData();
-//
-//		updateData();
+		queryData();
+
+		updateData();
 	}
 
 	private void updateData() throws UnsupportedEncodingException, JsonProcessingException {
