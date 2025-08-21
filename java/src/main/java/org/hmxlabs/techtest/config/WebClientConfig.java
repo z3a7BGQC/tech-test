@@ -9,6 +9,9 @@ public class WebClientConfig {
 
     @Bean
     public WebClient webClient(WebClient.Builder builder) {
-        return builder.build();
+
+        return builder
+                .baseUrl("http://localhost:8090/hadoopserver")
+                .build();
     }
 }

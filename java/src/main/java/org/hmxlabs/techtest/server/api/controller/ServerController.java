@@ -33,7 +33,8 @@ public class ServerController {
         log.info("Data envelope received: {}", dataEnvelope.getDataHeader().getName());
         Mono<String> hadoopResponse = server.saveDataEnvelope(dataEnvelope);
         LocalDateTime now = LocalDateTime.now();
-        log.info("Hadoop response: {} , received {}  ", hadoopResponse.toString(), now);
+        log.info("Hadoop response: {} , received {}  ", hadoopResponse.subscribe(), now);
+//        log.info("Hadoop error: {} , received {}  ", hadoopResponse.doOnError(), now);
         return ResponseEntity.ok(hadoopResponse); // change to CREATED status if successful checksum? FORBIDDEN if invalid? & send back Want-Content-Digest Header
     }
 

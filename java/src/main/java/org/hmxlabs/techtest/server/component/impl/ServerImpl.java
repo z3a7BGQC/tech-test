@@ -2,7 +2,6 @@ package org.hmxlabs.techtest.server.component.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.netty.handler.timeout.ReadTimeoutException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -16,10 +15,13 @@ import org.hmxlabs.techtest.server.persistence.model.DataBodyEntity;
 import org.hmxlabs.techtest.server.persistence.model.DataHeaderEntity;
 import org.hmxlabs.techtest.server.service.DataBodyService;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientException;
 import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClientRequest;
 import reactor.util.retry.Retry;
 
 import java.math.BigInteger;
@@ -107,14 +109,30 @@ public class ServerImpl implements Server {
 ////                .filter(throwable -> throwable instanceof RuntimeException);
         LocalDateTime now = LocalDateTime.now();
         log.info("Sending payload to Hadoop at {}", now);
+        log.info( "payload for Hadoop {}", payload);
         return webClient.post()
                         .uri("/pushbigdata")
+                    .httpRequest(httpRequest -> {
+                    HttpClientRequest reactorRequest = httpRequest.getNativeRequest();
+                    reactorRequest.responseTimeout(Duration.ofSeconds(10));
+                            }
+                    )
                         .bodyValue(payload)
                         .retrieve()
+                .onStatus(HttpStatus.GATEWAY_TIMEOUT::equals, response -> {
+                    // Handle the 504 error
+                    return response.bodyToMono(String.class)
+                            .flatMap(msg -> Mono.error(new WebClientException(msg) {
+                            }));
+                }) // need this to handle the errors, but it currently blocks retries
                         .bodyToMono(String.class)
-                        .retryWhen(Retry.backoff(2, Duration.ofSeconds(1))
-                                .filter(throwable -> throwable instanceof ReadTimeoutException))
-                        .onErrorComplete();
+                    .retryWhen(Retry.backoff(5, Duration.ofSeconds(3))
+                            .doBeforeRetry(retrySignal -> {
+                        log.info("Retry attempt: " + retrySignal.totalRetries());
+                            }));
+//                .bodyToMono(String.class)); // retries are for temporarily unavailable services
+//                                .filter(throwable -> throwable instanceof ReadTimeoutException));
+//                        .onErrorComplete();
 
         /**
          * different errors encountered:
@@ -126,9 +144,14 @@ public class ServerImpl implements Server {
          * - ideally I need to handle that error and try again
          *
          * I actually seemed to be getting better responses earlier (when my POST was simpler?)
+         *
          * I tried using a curl and that gave me the gateway error - my app seems to be failing immediately - sort out timeouts??
-         * TODO look at timeouts, see if rest of app can continue while we wait for the data to process?
+         *  TODO look at timeouts, see if rest of app can continue while we wait for the data to process?
          * the only issue with that is db calls - so data could become out of sync
+         *  FIX:  Turns out because I'd changed the webClient I'd removed the default base url -added that back :))
+         *
+         *  I can directly handle the GATEWAY TIMEOUT error
+         *
          */
     }
 
